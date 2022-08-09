@@ -1,7 +1,55 @@
 :root {
-  --bg-medium: #48a9a6;
-  --bg-dark: #4281a4;
-  --bg-light: #e4dfda;
+  --medium-blue: #366593;
+  --light-blue: #427cb5;
+  --lightest-blue: #f7f9fb;
 
-  --txt-light: white;
+  --medium-red: #ff0015;
+  --light-red: #fef2f3;
+
+  --darker-grey: #98a3a6;
+  --dark-grey: #c8c6c4;
+  --medium-shadow-grey: #edebe9;
+  --medium-grey: #f3f2f1;
+  --light-grey: #faf9f8;
+
+  --light-txt-color: #ffffff;
+  --dark-txt-color: #201f1e;
+}
+
+::-webkit-scrollbar {
+  height: 12px;
+  width: 10px;
+  background: var(--light-grey);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--dark-grey);
+  width: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--darker-grey);
+}
+
+::-webkit-scrollbar-corner {
+  background: red;
+}
+
+.options-header-button {
+  height: 100%;
+  border: none;
+  background-color: var(--medium-grey);
+  border-radius: 0.3rem;
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.8rem 0 0.8rem;
+}
+
+.options-header-button:hover {
+  background-color: var(--medium-shadow-grey);
 }
