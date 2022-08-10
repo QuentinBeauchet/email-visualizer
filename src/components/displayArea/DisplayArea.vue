@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section ref="section">
     <div v-if="mail" id="subject">{{ mail.header.subject }}</div>
     <div v-if="mail" id="area">
       <iframe v-if="mail.html" v-show="loaded" src='javascript:"";' :srcdoc="mail.html" ref="iframe" @load="onLoaded">
@@ -20,6 +20,7 @@ export default {
   name: "Display-Area",
   props: {
     mail: Object,
+    resizeBounds: Object,
   },
   components: {
     DisplayAreaReply,
@@ -39,6 +40,9 @@ export default {
         this.$refs.iframe.style.height = height;
       });
     },
+    getBoundingClientRect: function () {
+      return this.$refs.section.getBoundingClientRect();
+    },
   },
   watch: {
     mail: function () {
@@ -53,12 +57,12 @@ export default {
 
 <style scoped>
 section {
-  background-color: inherit;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   height: fit-content;
   max-height: calc(100% - 2rem);
+  min-width: calc(v-bind("resizeBounds.upper") - 2rem);
 }
 
 #area {

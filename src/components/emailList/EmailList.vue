@@ -1,32 +1,35 @@
 <template>
-  <SVGError v-if="fetchError" />
-  <section v-else>
-    <header>
-      <ArticleSelection
-        :is-visible="true"
-        selectionType="All"
-        :is-selected="this.selected.size == this.mailsInfos.length"
-        id="selectorAll"
-      />
-      <span>Filter</span>
-      <span>{{ this.mailsInfos.length }} / {{ this.boxInfos.messages }}</span>
-    </header>
-    <div id="list" @scroll="onScroll">
-      <MailArticle
-        v-for="mail in mailsList"
-        :key="mail.uid"
-        @mouseover="showButtons(mail.uid)"
-        @mouseleave="hideButtons"
-        @click="displayMail(mail)"
-        :is-visible="idVisible == mail.uid"
-        :mail="mail"
-        :is-displayed="idDisplayed == mail.uid"
-        :is-selected="this.selected.has(mail.uid)"
-        :is-pinned="this.pinneds.has(mail.uid)"
-        @pinned="onPinned"
-      >
-      </MailArticle>
+  <SVGError v-if="fetchError" ref="section" />
+  <section v-else ref="section">
+    <div id="container">
+      <header>
+        <ArticleSelection
+          :is-visible="true"
+          selectionType="All"
+          :is-selected="this.selected.size == this.mailsInfos.length"
+          id="selectorAll"
+        />
+        <span>Filter</span>
+        <span>{{ this.mailsInfos.length }} / {{ this.boxInfos.messages }}</span>
+      </header>
+      <div id="list" @scroll="onScroll">
+        <MailArticle
+          v-for="mail in mailsList"
+          :key="mail.uid"
+          @mouseover="showButtons(mail.uid)"
+          @mouseleave="hideButtons"
+          @click="displayMail(mail)"
+          :is-visible="idVisible == mail.uid"
+          :mail="mail"
+          :is-displayed="idDisplayed == mail.uid"
+          :is-selected="this.selected.has(mail.uid)"
+          :is-pinned="this.pinneds.has(mail.uid)"
+          @pinned="onPinned"
+        >
+        </MailArticle>
+      </div>
     </div>
+    <div id="resizeBar" ref="resizeBar" @mousedown="onDragStart" :class="{ resizing: resizeInfos }"></div>
   </section>
 </template>
 
@@ -72,10 +75,12 @@ export default {
       idDisplayed: undefined,
       idInSessionStorage: [],
       selected: new Set(),
+      resizeInfos: undefined,
     };
   },
   props: {
     pinneds: Set,
+    resizeBounds: Object,
   },
   computed: {
     mailsList: function () {
@@ -164,6 +169,42 @@ export default {
     onPinned: function (pinned) {
       this.$emit("pinned", pinned);
     },
+    onDrag: function (e) {
+      let { initLeft, lower, upper, width } = this.resizeInfos;
+      let newLeft = Math.max(Math.min(e.clientX, upper - 1), lower + 1) - initLeft;
+      if (upper - initLeft > width || newLeft < 0 || initLeft - lower > width || newLeft > 0)
+        this.$refs.resizeBar.style.left = `${newLeft}px`;
+    },
+    onDragStart: function () {
+      this.resizeInfos = {
+        initLeft: Math.round(this.$refs.resizeBar.getBoundingClientRect().left),
+        width: this.$refs.resizeBar.getBoundingClientRect().width,
+        lower: this.$refs.section.getBoundingClientRect().left + this.getValueFromPx(this.resizeBounds.lower),
+        upper: this.$parent.$refs.display.getBoundingClientRect().right - this.getValueFromPx(this.resizeBounds.upper),
+      };
+      this.addResizeEvents();
+    },
+    onDragEnd: function () {
+      this.$refs.section.style.width = `${
+        this.$refs.section.getBoundingClientRect().width +
+        this.$refs.resizeBar.getBoundingClientRect().right -
+        this.$refs.section.getBoundingClientRect().right
+      }px`;
+      this.$refs.resizeBar.style.left = "0px";
+      this.resizeInfos = undefined;
+      this.removeResizeEvents();
+    },
+    addResizeEvents: function () {
+      window.addEventListener("mousemove", this.onDrag);
+      window.addEventListener("mouseup", this.onDragEnd);
+    },
+    removeResizeEvents: function () {
+      window.removeEventListener("mousemove", this.onDrag);
+      window.removeEventListener("mouseup", this.onDragEnd);
+    },
+    getValueFromPx: function (px) {
+      return parseFloat(px) || 0;
+    },
   },
 };
 </script>
@@ -174,10 +215,22 @@ section {
   font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto,
     "Helvetica Neue", sans-serif;
   color: var(--dark-txt-color);
-  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  min-width: v-bind("resizeBounds.lower");
+  max-width: calc(85% - v-bind("resizeBounds.upper"));
+  width: 25%;
+  flex-shrink: 0;
+}
+
+#container {
+  flex-grow: 0;
   height: 100%;
   display: flex;
   flex-direction: column;
+  width: calc(100% - 4px);
+  border-right: 1px solid var(--medium-shadow-grey);
 }
 
 #list {
@@ -193,9 +246,24 @@ header {
   flex-shrink: 0;
   background-color: var(--light-txt-color);
   border: 1px solid var(--medium-grey);
+  border-width: 0 0 1px 0;
 }
 
 #selectorAll {
   margin-left: 0.2rem;
+}
+
+#resizeBar {
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  user-select: none;
+  z-index: 10;
+  position: relative;
+  left: 0px;
+}
+
+.resizing {
+  background-color: var(--medium-shadow-grey);
 }
 </style>

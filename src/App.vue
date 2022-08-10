@@ -9,10 +9,21 @@
   <main>
     <section id="menu" v-if="expanded"></section>
     <Suspense>
-      <EmailList @displayingMail="ondDisplayingMail" :pinneds="pinneds" @pinned="onPinned" />
+      <EmailList
+        @displayingMail="ondDisplayingMail"
+        :pinneds="pinneds"
+        @pinned="onPinned"
+        :resizeBounds="resizeBounds"
+      />
       <template #fallback><LoadingBar /></template>
     </Suspense>
-    <DisplayArea id="displayArea" :class="{ extendedDisplayArea: !expanded }" :mail="displayedMail" />
+    <DisplayArea
+      id="displayArea"
+      :class="{ extendedDisplayArea: !expanded }"
+      :mail="displayedMail"
+      ref="display"
+      :resizeBounds="resizeBounds"
+    />
   </main>
 </template>
 
@@ -37,6 +48,10 @@ export default {
       displayedMail: undefined,
       expanded: true,
       pinneds: new Set(),
+      resizeBounds: {
+        lower: "300px",
+        upper: "450px",
+      },
     };
   },
   methods: {
@@ -71,20 +86,19 @@ body {
 <style scoped>
 main {
   flex-grow: 1;
-  background-color: var(--light-grey);
+  background: var(--light-grey);
   display: flex;
   overflow: hidden;
 }
 
 #menu {
-  background-color: var(--medium-grey);
   width: 15%;
   flex-shrink: 0;
+  background: var(--medium-grey);
 }
 
 #displayArea {
-  width: 60%;
-  flex-shrink: 0;
+  flex-grow: 1;
 }
 
 .extendedDisplayArea {
