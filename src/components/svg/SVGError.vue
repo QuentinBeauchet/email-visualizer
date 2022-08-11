@@ -16,7 +16,7 @@ export default {
 
 <style scoped>
 div {
-  width: 100%;
+  width: 25%;
   height: 100%;
   display: flex;
   justify-content: center;

@@ -12,12 +12,19 @@
 <script>
 export default {
   name: "Loading-Bar",
+  props: {
+    resizeBounds: Object,
+  },
 };
 </script>
 
 <style scoped>
 #wrapper {
-  width: 100%;
+  flex-grow: 0;
+  min-width: v-bind("resizeBounds.lower");
+  max-width: calc(85% - v-bind("resizeBounds.upper"));
+  width: 25%;
+  flex-shrink: 0;
   height: 100%;
   display: flex;
   justify-content: center;

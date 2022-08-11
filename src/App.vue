@@ -14,8 +14,9 @@
         :pinneds="pinneds"
         @pinned="onPinned"
         :resizeBounds="resizeBounds"
+        @resize="onResize"
       />
-      <template #fallback><LoadingBar /></template>
+      <template #fallback><LoadingBar :resizeBounds="resizeBounds" /></template>
     </Suspense>
     <DisplayArea
       id="displayArea"
@@ -23,6 +24,7 @@
       :mail="displayedMail"
       ref="display"
       :resizeBounds="resizeBounds"
+      :resizing="resizing"
     />
   </main>
 </template>
@@ -52,6 +54,7 @@ export default {
         lower: "300px",
         upper: "450px",
       },
+      resizing: false,
     };
   },
   methods: {
@@ -67,6 +70,9 @@ export default {
       } else {
         this.pinneds.delete(uid);
       }
+    },
+    onResize: function (resizing) {
+      this.resizing = resizing;
     },
   },
 };

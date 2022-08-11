@@ -32,7 +32,7 @@
 }
 
 ::-webkit-scrollbar-corner {
-  background: red;
+  background: var(--light-grey);
 }
 
 .options-header-button {

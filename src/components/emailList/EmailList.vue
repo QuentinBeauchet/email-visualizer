@@ -195,10 +195,12 @@ export default {
       this.removeResizeEvents();
     },
     addResizeEvents: function () {
+      this.$emit("resize", true);
       window.addEventListener("mousemove", this.onDrag);
       window.addEventListener("mouseup", this.onDragEnd);
     },
     removeResizeEvents: function () {
+      this.$emit("resize", false);
       window.removeEventListener("mousemove", this.onDrag);
       window.removeEventListener("mouseup", this.onDragEnd);
     },
@@ -211,13 +213,13 @@ export default {
 
 <style scoped>
 section {
-  flex-grow: 0;
   font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto,
     "Helvetica Neue", sans-serif;
   color: var(--dark-txt-color);
   height: 100%;
   display: flex;
   flex-direction: row;
+  flex-grow: 0;
   min-width: v-bind("resizeBounds.lower");
   max-width: calc(85% - v-bind("resizeBounds.upper"));
   width: 25%;
