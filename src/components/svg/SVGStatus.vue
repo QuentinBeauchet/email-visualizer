@@ -32,6 +32,7 @@ svg {
   height: 15px;
   cursor: pointer;
   padding: 3px;
+  flex-shrink: 0;
 }
 
 svg:hover {

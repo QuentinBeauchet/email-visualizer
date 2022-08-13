@@ -8,6 +8,7 @@
           selectionType="All"
           :is-selected="this.selected.size == this.mailsInfos.length"
           id="selectorAll"
+          @setSelectionState="onSetSelectionState"
         />
         <span>Filter</span>
         <span>{{ this.mailsInfos.length }} / {{ this.boxInfos.messages }}</span>
@@ -25,6 +26,7 @@
           :is-selected="this.selected.has(mail.uid)"
           :is-pinned="this.pinneds.has(mail.uid)"
           @pinned="onPinned"
+          @setSelectionState="onSetSelectionState"
         >
         </MailArticle>
       </div>
@@ -81,6 +83,7 @@ export default {
   props: {
     pinneds: Set,
     resizeBounds: Object,
+    displayRight: Number,
   },
   computed: {
     mailsList: function () {
@@ -125,19 +128,22 @@ export default {
         }
       }
     },
-    select: function (uid) {
-      this.selected.add(uid);
-    },
-    unselect: function (uid) {
-      this.selected.delete(uid);
-    },
-    selectAll: function () {
-      this.mailsInfos.forEach((mail) => {
-        this.selected.add(mail.uid);
-      });
-    },
-    unselectAll: function () {
-      this.selected.clear();
+    onSetSelectionState: function ({ selected, all, uid }) {
+      if (all) {
+        if (selected) {
+          this.mailsInfos.forEach((mail) => {
+            this.selected.add(mail.uid);
+          });
+        } else {
+          this.selected.clear();
+        }
+      } else {
+        if (selected) {
+          this.selected.add(uid);
+        } else {
+          this.selected.delete(uid);
+        }
+      }
     },
     fetchMoreMailsInfos: async function () {
       let { from, step, total, canFetch } = this.fetchMailsOptions;
@@ -180,7 +186,7 @@ export default {
         initLeft: Math.round(this.$refs.resizeBar.getBoundingClientRect().left),
         width: this.$refs.resizeBar.getBoundingClientRect().width,
         lower: this.$refs.section.getBoundingClientRect().left + this.getValueFromPx(this.resizeBounds.lower),
-        upper: this.$parent.$refs.display.getBoundingClientRect().right - this.getValueFromPx(this.resizeBounds.upper),
+        upper: this.displayRight - this.getValueFromPx(this.resizeBounds.upper),
       };
       this.addResizeEvents();
     },
@@ -213,8 +219,6 @@ export default {
 
 <style scoped>
 section {
-  font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto,
-    "Helvetica Neue", sans-serif;
   color: var(--dark-txt-color);
   height: 100%;
   display: flex;

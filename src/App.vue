@@ -15,6 +15,7 @@
         @pinned="onPinned"
         :resizeBounds="resizeBounds"
         @resize="onResize"
+        :displayRight="getDisplayRight()"
       />
       <template #fallback><LoadingBar :resizeBounds="resizeBounds" /></template>
     </Suspense>
@@ -73,6 +74,9 @@ export default {
     },
     onResize: function (resizing) {
       this.resizing = resizing;
+    },
+    getDisplayRight: function () {
+      return this.$refs.display?.getBoundingClientRect().right;
     },
   },
 };

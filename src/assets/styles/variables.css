@@ -14,6 +14,8 @@
 
   --light-txt-color: #ffffff;
   --dark-txt-color: #201f1e;
+
+  --test: #323130;
 }
 
 ::-webkit-scrollbar {
@@ -48,8 +50,15 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0 0.8rem 0 0.8rem;
+  font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto,
+    "Helvetica Neue", sans-serif;
 }
 
 .options-header-button:hover {
   background-color: var(--medium-shadow-grey);
+}
+
+body {
+  font-family: "Segoe UI", "Segoe UI Web (West European)", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto,
+    "Helvetica Neue", sans-serif;
 }

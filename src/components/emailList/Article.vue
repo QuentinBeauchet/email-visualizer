@@ -1,10 +1,14 @@
 <template>
   <article :class="{ selected: isDisplayed || isSelected, pinned: isPinned }">
     <div class="status" :class="{ seen: isSeen }"></div>
-    <ArticleSelection :is-visible="isVisible || isDisplayed" :is-selected="isSelected" />
+    <ArticleSelection
+      :is-visible="isVisible || isDisplayed"
+      :is-selected="isSelected"
+      @setSelectionState="onSetSelectionState"
+    />
     <div id="content">
       <div id="L1" v-if="!isPinned">
-        <span id="sender">{{ getSenderString(mail.header.from) }}</span>
+        <span id="sender">{{ mail.header.from.name || mail.header.from.address }}</span>
         <SVGStatus v-if="isVisible" @pinned="onPinned" @statusChange="onStatusChange" />
         <SVGPin v-if="isVisible" :pinned="isPinned" @pinned="onPinned" />
       </div>
@@ -67,22 +71,14 @@ export default {
       if (msSinceThen < getDayInMs(30)) return `${getDayString[date.getDay()]} ${date.getDate()}/${date.getMonth()}`;
       return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
     },
-    getSenderString: (from) => {
-      const re = new RegExp(".*<.*>");
-      if (re.test(from)) return from.split("<")[0];
-      return from;
-    },
-    select: function () {
-      this.$parent.select(this.mail.uid);
-    },
-    unselect: function () {
-      this.$parent.unselect(this.mail.uid);
-    },
     onPinned: function (pinned) {
       this.$emit("pinned", { pinned, uid: this.mail.uid });
     },
     onStatusChange: function (status) {
       console.log("STATUS CHANGE", status);
+    },
+    onSetSelectionState: function ({ selected, all }) {
+      this.$emit("setSelectionState", { selected, all, uid: this.mail.uid });
     },
   },
 };

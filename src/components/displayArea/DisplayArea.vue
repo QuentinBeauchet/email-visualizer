@@ -3,7 +3,8 @@
     <div v-if="mail" id="subject">
       {{ mail.header.subject }}
     </div>
-    <div v-if="mail" id="area">
+    <div v-if="mail" id="area" ref="area">
+      <DisplayAreaSender v-if="loaded" :mail="mail" id="sender" />
       <iframe
         v-if="mail.html"
         v-show="loaded"
@@ -15,7 +16,7 @@
       >
       </iframe>
       <SVGError v-else id="error" />
-      <Loading v-if="mail.html && !loaded" />
+      <Loading v-if="mail.html && !loaded" :resizeBounds="resizeBounds" />
       <DisplayAreaReply />
     </div>
   </section>
@@ -25,6 +26,7 @@
 import DisplayAreaReply from "./DisplayAreaReply.vue";
 import Loading from "../svg/Loading.vue";
 import SVGError from "../svg/SVGError.vue";
+import DisplayAreaSender from "./DisplayAreaSender.vue";
 
 export default {
   name: "Display-Area",
@@ -37,16 +39,22 @@ export default {
     DisplayAreaReply,
     Loading,
     SVGError,
+    DisplayAreaSender,
   },
   data: function () {
     return {
       loaded: false,
       iframeFlexAlign: "center",
+      widthSender: "100%",
       resizeObserver: new ResizeObserver((entries) => {
         this.$refs.iframe.style.height = `${entries[0].contentRect.height}px`;
         this.$refs.iframe.style.width = `${entries[0].contentRect.width}px`;
+        this.onResize();
       }),
     };
+  },
+  mounted: function () {
+    window.addEventListener("resize", this.onResize);
   },
   methods: {
     onLoaded: function () {
@@ -55,29 +63,36 @@ export default {
     getBoundingClientRect: function () {
       return this.$refs.section.getBoundingClientRect();
     },
+    onResize: function () {
+      if (this.$refs.iframe) {
+        this.iframeFlexAlign =
+          this.$refs.iframe.parentNode.getBoundingClientRect().width - 30 <
+          this.$refs.iframe.getBoundingClientRect().width
+            ? "flex-start"
+            : "center";
+        this.widthSender = this.$refs.iframe.style.width;
+      }
+    },
   },
   updated: function () {
     if (this.$refs.iframe) {
       this.$nextTick(() => {
-        this.resizeObserver.observe(this.$refs.iframe.contentWindow.document.body.parentNode);
+        let parentNode = this.$refs.iframe.contentWindow.document.body?.parentNode;
+        if (parentNode) this.resizeObserver.observe(parentNode);
       });
     }
   },
   watch: {
     mail: function () {
       this.resizeObserver.disconnect();
+      if (this.$refs.iframe) this.$refs.iframe.style.width = "";
       this.loaded = false;
       setTimeout(() => {
         this.loaded = true;
       }, 800);
     },
     resizing: function () {
-      if (this.$refs.iframe) {
-        this.iframeFlexAlign =
-          this.$refs.iframe.parentNode.getBoundingClientRect().width < this.$refs.iframe.getBoundingClientRect().width
-            ? "flex-start"
-            : "center";
-      }
+      this.onResize();
     },
   },
 };
@@ -106,7 +121,7 @@ section {
   flex-grow: 1;
   overflow-y: auto;
   flex-shrink: 1;
-  width: calc(100% + 10px);
+  width: 100%;
 }
 
 #subject {
@@ -121,11 +136,11 @@ section {
 
 iframe {
   flex-grow: 1;
-  width: calc(100% - 10px);
-  margin-left: 10px;
+  width: calc(100% - 20px);
   flex-shrink: 0;
   border: none;
   align-self: v-bind("iframeFlexAlign");
+  margin: 0 10px 0 10px;
 }
 
 .resizing {
@@ -136,7 +151,11 @@ iframe {
   width: 30%;
 }
 
-::-webkit-scrollbar {
-  border-left: 1px solid var(--medium-shadow-grey);
+#sender {
+  padding: 0 10px 1rem 10px;
+  display: flex;
+  justify-content: space-between;
+  align-self: flex-start;
+  width: max(v-bind("widthSender"), calc(100% - 20px));
 }
 </style>

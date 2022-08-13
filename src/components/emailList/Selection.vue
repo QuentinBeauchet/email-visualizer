@@ -67,11 +67,7 @@ export default {
       this.isCircleTickVisible = false;
     },
     select: function () {
-      if (this.selectionType == "All") {
-        this.isSelected ? this.$parent.unselectAll() : this.$parent.selectAll();
-      } else {
-        this.isSelected ? this.$parent.unselect() : this.$parent.select();
-      }
+      this.$emit("setSelectionState", { selected: !this.isSelected, all: this.selectionType == "All" });
     },
   },
 };

@@ -24,7 +24,7 @@ module.exports.getEmailsInfos = (from = 0, to = 10) => {
         }
         console.log(`getEmailsInfos => ${Math.max(box.messages.total - to, 1)}:${box.messages.total - from}`);
         var f = imap.seq.fetch(`${Math.max(box.messages.total - to, 1)}:${box.messages.total - from}`, {
-          bodies: ["HEADER.FIELDS (FROM SUBJECT)"],
+          bodies: ["HEADER.FIELDS (FROM SUBJECT TO)"],
         });
         var messages = [];
         f.on("message", (msg) => {
@@ -45,8 +45,9 @@ module.exports.getEmailsInfos = (from = 0, to = 10) => {
                 msg.removeAllListeners();
                 resolveMessage({
                   header: {
-                    subject: parsed.headers.get("subject"),
-                    from: parsed.headers.get("from").text,
+                    subject: parsed.subject,
+                    from: parsed.from.value[0],
+                    to: parsed.to.value,
                   },
                   uid: attributes.uid,
                   date: attributes.date,
@@ -92,7 +93,7 @@ module.exports.getEmail = (uid) => {
         }
         console.log(`getEmail => ${uid}`);
         var f = imap.fetch(uid, {
-          bodies: ["HEADER.FIELDS (FROM SUBJECT)", "TEXT"],
+          bodies: ["HEADER.FIELDS (FROM SUBJECT TO)", "TEXT"],
           struct: true,
         });
         f.once("message", (msg) => {
@@ -115,8 +116,9 @@ module.exports.getEmail = (uid) => {
             msg.removeAllListeners();
             resolve({
               header: {
-                subject: parsed.headers.get("subject"),
-                from: parsed.headers.get("from").text,
+                subject: parsed.subject,
+                from: parsed.from.value[0],
+                to: parsed.to.value,
               },
               html,
               uid: attributes.uid,
