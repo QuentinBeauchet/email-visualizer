@@ -6,7 +6,12 @@
     <OptionsHeaderDeletion v-if="mail" />
     <OptionsHeaderSpam v-if="mail" />
     <OptionsHeaderBlockSender v-if="mail" />
-    <OptionsHeaderPin v-if="mail" @pinned="onPinned" :pinned="pinned" :key="mail.uid" />
+    <OptionsHeaderPin
+      v-if="mail"
+      @pinned="onPinned"
+      :pinned="pinned"
+      :key="mail.uid"
+    />
     <OptionsHeaderChangeStatus :is-seen="isSeen" />
   </header>
 </template>
@@ -22,7 +27,7 @@ import OptionsHeaderPin from "./OptionsHeaderPin.vue";
 import OptionsHeaderChangeStatus from "./OptionsHeaderChangeStatus.vue";
 
 export default {
-  name: "Options-Header",
+  name: "OptionsHeader",
   components: {
     OptionsHeaderExpend,
     OptionsHeaderNew,
@@ -37,6 +42,7 @@ export default {
     mail: Object,
     pinned: Boolean,
   },
+  emits: ["expansion", "pinned"],
   data: function () {
     return {
       iframeContent: undefined,

@@ -29,7 +29,7 @@
 
 <script>
 export default {
-  name: "Display-Area-Reply",
+  name: "DisplayAreaReply",
   data: function () {
     return {
       isMoreVisible: false,

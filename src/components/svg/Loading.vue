@@ -11,7 +11,7 @@
 
 <script>
 export default {
-  name: "Loading-Bar",
+  name: "LoadingBar",
   props: {
     resizeBounds: Object,
   },

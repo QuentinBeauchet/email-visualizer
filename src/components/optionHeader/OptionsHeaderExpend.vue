@@ -11,7 +11,8 @@
 
 <script>
 export default {
-  name: "Options-Header-Expend",
+  name: "OptionsHeaderExpend",
+  emits: ["expansion"],
   methods: {
     onExpansion: function () {
       this.$emit("expansion");

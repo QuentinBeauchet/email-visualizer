@@ -11,7 +11,7 @@
 
 <script>
 export default {
-  name: "Options-Header-Deletion",
+  name: "OptionsHeaderDeletion",
   methods: {
     onClick: function () {
       console.log("DELETE MAIL");

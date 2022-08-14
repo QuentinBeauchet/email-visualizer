@@ -16,7 +16,7 @@
       >
       </iframe>
       <SVGError v-else id="error" />
-      <Loading v-if="mail.html && !loaded" :resizeBounds="resizeBounds" />
+      <Loading v-if="mail.html && !loaded" :resize-bounds="resizeBounds" />
       <DisplayAreaReply />
     </div>
   </section>
@@ -29,7 +29,7 @@ import SVGError from "../svg/SVGError.vue";
 import DisplayAreaSender from "./DisplayAreaSender.vue";
 
 export default {
-  name: "Display-Area",
+  name: "DisplayArea",
   props: {
     mail: Object,
     resizeBounds: Object,
@@ -77,7 +77,8 @@ export default {
   updated: function () {
     if (this.$refs.iframe) {
       this.$nextTick(() => {
-        let parentNode = this.$refs.iframe.contentWindow.document.body?.parentNode;
+        let parentNode =
+          this.$refs.iframe.contentWindow.document.body?.parentNode;
         if (parentNode) this.resizeObserver.observe(parentNode);
       });
     }

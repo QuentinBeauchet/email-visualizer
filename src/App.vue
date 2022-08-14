@@ -10,21 +10,23 @@
     <section id="menu" v-if="expanded"></section>
     <Suspense>
       <EmailList
-        @displayingMail="ondDisplayingMail"
+        @displaying-mail="ondDisplayingMail"
         :pinneds="pinneds"
         @pinned="onPinned"
-        :resizeBounds="resizeBounds"
+        :resize-bounds="resizeBounds"
         @resize="onResize"
-        :displayRight="getDisplayRight()"
+        :display-right="getDisplayRight()"
       />
-      <template #fallback><LoadingBar :resizeBounds="resizeBounds" /></template>
+      <template #fallback
+        ><LoadingBar :resize-bounds="resizeBounds"
+      /></template>
     </Suspense>
     <DisplayArea
       id="displayArea"
       :class="{ extendedDisplayArea: !expanded }"
       :mail="displayedMail"
       ref="display"
-      :resizeBounds="resizeBounds"
+      :resize-bounds="resizeBounds"
       :resizing="resizing"
     />
   </main>

@@ -1,7 +1,12 @@
 <template>
   <div>
     <Transition name="moreOptions">
-      <div id="moreOptions" v-show="isMoreVisible" tabindex="0" @focusout="handleFocusOut">
+      <div
+        id="moreOptions"
+        v-show="isMoreVisible"
+        tabindex="0"
+        @focusout="handleFocusOut"
+      >
         <ul @keydown.prevent="onKeyDown" ref="listOptions">
           <li @click="reply(0)" tabindex="1">Reply</li>
           <li @click="reply(1)" tabindex="2">Reply to all</li>
@@ -18,7 +23,12 @@
       <span>Reply to all</span>
     </button>
     <div id="bar"></div>
-    <button id="more" @click="onMore" ref="moreButton" class="options-header-button">
+    <button
+      id="more"
+      @click="onMore"
+      ref="moreButton"
+      class="options-header-button"
+    >
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path
           d="m11 11h-7.25c-.414 0-.75.336-.75.75s.336.75.75.75h7.25v7.25c0 .414.336.75.75.75s.75-.336.75-.75v-7.25h7.25c.414 0 .75-.336.75-.75s-.336-.75-.75-.75h-7.25v-7.25c0-.414-.336-.75-.75-.75s-.75.336-.75.75z"
@@ -31,7 +41,7 @@
 
 <script>
 export default {
-  name: "Options-Header-Reply",
+  name: "OptionsHeaderReply",
   data: function () {
     return {
       isMoreVisible: false,
@@ -59,7 +69,9 @@ export default {
     },
     handleFocusOut(e) {
       if (
-        !this.$refs.listOptions.contains(e?.relatedTarget || document.activeElement) &&
+        !this.$refs.listOptions.contains(
+          e?.relatedTarget || document.activeElement
+        ) &&
         this.$refs.moreButton != e?.relatedTarget
       ) {
         this.isMoreVisible = false;
@@ -80,7 +92,9 @@ export default {
       }
       if (["ArrowUp", "ArrowLeft"].includes(key)) {
         let newIndex = index - 1;
-        this.$refs.listOptions.childNodes[newIndex < 0 ? total - 1 : newIndex].focus();
+        this.$refs.listOptions.childNodes[
+          newIndex < 0 ? total - 1 : newIndex
+        ].focus();
       }
     },
   },

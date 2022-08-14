@@ -41,7 +41,8 @@
 
 <script>
 export default {
-  name: "Article-Selection",
+  name: "ArticleSelection",
+  emits: ["setSelectionState"],
   data: function () {
     return {
       isCircleTickVisible: false,
@@ -50,7 +51,8 @@ export default {
   computed: {
     svgType() {
       if (this.isSelected) return "selected";
-      if (this.isVisible) return this.isCircleTickVisible ? "tickVisible" : "tickHidden";
+      if (this.isVisible)
+        return this.isCircleTickVisible ? "tickVisible" : "tickHidden";
       return "none";
     },
   },
@@ -67,7 +69,10 @@ export default {
       this.isCircleTickVisible = false;
     },
     select: function () {
-      this.$emit("setSelectionState", { selected: !this.isSelected, all: this.selectionType == "All" });
+      this.$emit("setSelectionState", {
+        selected: !this.isSelected,
+        all: this.selectionType == "All",
+      });
     },
   },
 };

@@ -1,6 +1,6 @@
 <template>
   <button @click="onClick(!this.isSeen)" class="options-header-button">
-    <SVGStatus @statusChange="onClick" />
+    <SVGStatus @status-change="onClick" />
     <span v-if="this.isSeen">Mark as not read</span>
     <span v-else>Mark as read</span>
   </button>
@@ -9,7 +9,7 @@
 <script>
 import SVGStatus from "../svg/SVGStatus.vue";
 export default {
-  name: "Options-Header-Change-Status",
+  name: "OptionsHeaderChangeStatus",
   props: {
     isSeen: Boolean,
   },

@@ -7,7 +7,7 @@
 
 <script>
 export default {
-  name: "Custom-Input",
+  name: "CustomInput",
   props: {
     label: String,
     type: String,

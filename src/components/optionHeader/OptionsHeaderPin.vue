@@ -8,7 +8,8 @@
 <script>
 import SVGPin from "../svg/SVGPin.vue";
 export default {
-  name: "Options-Header-Pin",
+  name: "OptionsHeaderPin",
+  emits: ["pinned"],
   props: {
     pinned: Boolean,
   },

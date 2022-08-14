@@ -10,7 +10,7 @@
 
 <script>
 export default {
-  name: "SVG-Error",
+  name: "SVGError",
 };
 </script>
 

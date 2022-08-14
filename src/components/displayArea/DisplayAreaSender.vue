@@ -4,11 +4,14 @@
       <img :src="imgUrl" @click="filterBySender" />
       <div id="text">
         <span id="from" @click="filterBySender"
-          >{{ mail.header.from.name }} {{ "<" }}{{ mail.header.from.address }}{{ ">" }}</span
+          >{{ mail.header.from.name }} {{ "<" }}{{ mail.header.from.address
+          }}{{ ">" }}</span
         >
         <span id="to" @click="onZoom"
           >To :
-          <template v-for="person in mail.header.to">{{ `${person.name} <${person.address}>;` }}</template>
+          <template v-for="person in mail.header.to">{{
+            `${person.name} <${person.address}>;`
+          }}</template>
         </span>
       </div>
     </div>
@@ -20,8 +23,9 @@
 
 <script>
 export default {
-  name: "Display-Area-Sender",
+  name: "DisplayAreaSender",
   props: { mail: Object },
+  emits: ["filter"],
   data: function () {
     return {
       toStyle: { cursor: "zoom-in", height: "15px" },

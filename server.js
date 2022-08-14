@@ -37,7 +37,12 @@ app.use("/", express.static(path));
 app.use("/test", express.static(`${__dirname}/public/`));
 
 app.use("/infos", (req, res) => {
-  addToRequestQueue(req, res, "infos", getEmailsInfos(req.query.from, req.query.to));
+  addToRequestQueue(
+    req,
+    res,
+    "infos",
+    getEmailsInfos(req.query.from, req.query.to)
+  );
 });
 
 app.use("/mail", (req, res) => {

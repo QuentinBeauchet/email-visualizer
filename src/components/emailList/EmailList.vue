@@ -5,10 +5,10 @@
       <header>
         <ArticleSelection
           :is-visible="true"
-          selectionType="All"
+          selection-type="All"
           :is-selected="this.selected.size == this.mailsInfos.length"
           id="selectorAll"
-          @setSelectionState="onSetSelectionState"
+          @set-selection-state="onSetSelectionState"
         />
         <span>Filter</span>
         <span>{{ this.mailsInfos.length }} / {{ this.boxInfos.messages }}</span>
@@ -26,12 +26,17 @@
           :is-selected="this.selected.has(mail.uid)"
           :is-pinned="this.pinneds.has(mail.uid)"
           @pinned="onPinned"
-          @setSelectionState="onSetSelectionState"
+          @set-selection-state="onSetSelectionState"
         >
         </MailArticle>
       </div>
     </div>
-    <div id="resizeBar" ref="resizeBar" @mousedown="onDragStart" :class="{ resizing: resizeInfos }"></div>
+    <div
+      id="resizeBar"
+      ref="resizeBar"
+      @mousedown="onDragStart"
+      :class="{ resizing: resizeInfos }"
+    ></div>
   </section>
 </template>
 
@@ -41,12 +46,13 @@ import SVGError from "../svg/SVGError.vue";
 import ArticleSelection from "./Selection.vue";
 
 export default {
-  name: "Email-List",
+  name: "EmailList",
   components: {
     MailArticle,
     SVGError,
     ArticleSelection,
   },
+  emits: ["displayingMail", "pinned", "resize"],
   async setup() {
     try {
       console.log("SETUP FETCH");
@@ -54,7 +60,9 @@ export default {
       const step = 200;
       const from = step;
 
-      let res = await fetch(`http://localhost:3000/infos?from=0&to=${step - 1}`);
+      let res = await fetch(
+        `http://localhost:3000/infos?from=0&to=${step - 1}`
+      );
       let json = await res.json();
       return {
         boxInfos: json.box,
@@ -108,23 +116,42 @@ export default {
         this.idDisplayed = uid;
         let cache = sessionStorage.getItem(uid);
         if (cache) {
-          this.$emit("displayingMail", { uid, flags, header, date, html: cache });
+          this.$emit("displayingMail", {
+            uid,
+            flags,
+            header,
+            date,
+            html: cache,
+          });
         } else {
           fetch(`http://localhost:3000/mail?uid=${uid}`)
             .then((res) => res.json())
             .then((json) => {
               sessionStorage.setItem(uid, json.html);
-              this.$emit("displayingMail", { uid, flags, header, date, html: json.html });
+              this.$emit("displayingMail", {
+                uid,
+                flags,
+                header,
+                date,
+                html: json.html,
+              });
             })
             .catch(() => {
-              this.$emit("displayingMail", { uid, flags, header, date, html: undefined });
+              this.$emit("displayingMail", {
+                uid,
+                flags,
+                header,
+                date,
+                html: undefined,
+              });
             });
         }
 
         this.idInSessionStorage.push(uid);
         if (new Set(this.idInSessionStorage).size > 10) {
           let oldUid = this.idInSessionStorage.shift();
-          if (!this.idInSessionStorage.includes(oldUid)) sessionStorage.removeItem(oldUid);
+          if (!this.idInSessionStorage.includes(oldUid))
+            sessionStorage.removeItem(oldUid);
         }
       }
     },
@@ -177,15 +204,23 @@ export default {
     },
     onDrag: function (e) {
       let { initLeft, lower, upper, width } = this.resizeInfos;
-      let newLeft = Math.max(Math.min(e.clientX, upper - 1), lower + 1) - initLeft;
-      if (upper - initLeft > width || newLeft < 0 || initLeft - lower > width || newLeft > 0)
+      let newLeft =
+        Math.max(Math.min(e.clientX, upper - 1), lower + 1) - initLeft;
+      if (
+        upper - initLeft > width ||
+        newLeft < 0 ||
+        initLeft - lower > width ||
+        newLeft > 0
+      )
         this.$refs.resizeBar.style.left = `${newLeft}px`;
     },
     onDragStart: function () {
       this.resizeInfos = {
         initLeft: Math.round(this.$refs.resizeBar.getBoundingClientRect().left),
         width: this.$refs.resizeBar.getBoundingClientRect().width,
-        lower: this.$refs.section.getBoundingClientRect().left + this.getValueFromPx(this.resizeBounds.lower),
+        lower:
+          this.$refs.section.getBoundingClientRect().left +
+          this.getValueFromPx(this.resizeBounds.lower),
         upper: this.displayRight - this.getValueFromPx(this.resizeBounds.upper),
       };
       this.addResizeEvents();

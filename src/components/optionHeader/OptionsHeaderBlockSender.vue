@@ -11,7 +11,7 @@
 
 <script>
 export default {
-  name: "Options-Header-BlockSender",
+  name: "OptionsHeaderBlockSender",
   methods: {
     onClick: function () {
       console.log("Block the Sender");

@@ -1,7 +1,13 @@
 <template>
   <div @click="hideConnection" id="parent">
     <form @click.stop id="modal">
-      <Input v-for="(item, index) in inputs" :key="index" :label="item.label" :type="item.type" v-model="item.value" />
+      <Input
+        v-for="(item, index) in inputs"
+        :key="index"
+        :label="item.label"
+        :type="item.type"
+        v-model="item.value"
+      />
       <button @click.prevent="connect">Connect</button>
     </form>
   </div>
@@ -11,7 +17,7 @@
 import Input from "./Input.vue";
 
 export default {
-  name: "Connexion-Modal",
+  name: "ConnexionModal",
   methods: {
     hideConnection: function () {
       this.$parent.hideConnection();

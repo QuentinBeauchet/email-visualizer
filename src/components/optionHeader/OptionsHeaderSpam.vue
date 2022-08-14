@@ -11,7 +11,7 @@
 
 <script>
 export default {
-  name: "Options-Header-Spam",
+  name: "OptionsHeaderSpam",
   methods: {
     onClick: function () {
       console.log("Signal as SPAM");
