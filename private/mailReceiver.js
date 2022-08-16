@@ -3,17 +3,16 @@ var Imap = require("node-imap");
 const simpleParser = require("mailparser").simpleParser;
 let { decodeBuffer, flattenAttribute, getHTMLContent } = require("./utils.js");
 
-const options = {
-  user: process.env.USER_MAIL,
-  password: process.env.USER_PASSWORD,
-  host: "imap.free.fr",
-  port: 993,
-  tls: true,
-};
-
-module.exports.getEmailsInfos = (from = 0, to = 10) => {
+module.exports.getEmailsInfos = ({ auth, host, port, range }) => {
+  let { from = 10, to = 0 } = range;
   return new Promise((resolve, reject) => {
-    var imap = new Imap(options);
+    var imap = new Imap({
+      user: auth.user,
+      password: auth.pass,
+      host,
+      port,
+      tls: true,
+    });
     imap.once("error", reject);
     imap.once("end", () => console.log("Connection ended"));
     imap.once("ready", () => {
@@ -80,9 +79,15 @@ module.exports.getEmailsInfos = (from = 0, to = 10) => {
   });
 };
 
-module.exports.getEmail = (uid) => {
+module.exports.getEmail = ({ auth, host, port, uid }) => {
   return new Promise((resolve, reject) => {
-    var imap = new Imap(options);
+    var imap = new Imap({
+      user: auth.user,
+      password: auth.pass,
+      host,
+      port,
+      tls: true,
+    });
     imap.once("error", reject);
     imap.once("end", () => console.log("Connection ended"));
     imap.once("ready", () => {

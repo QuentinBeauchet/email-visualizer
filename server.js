@@ -1,4 +1,4 @@
-let { getEmailsInfos, getEmail } = require("./private/imapConnection.js");
+let { getEmailsInfos, getEmail, sendMail } = require("./private/customImap.js");
 
 const express = require("express");
 var cors = require("cors");
@@ -31,22 +31,22 @@ function addToRequestQueue(req, res, queue, promise) {
 }
 
 app.use(cors());
+app.use(express.json());
 
 app.use("/", express.static(path));
 
 app.use("/test", express.static(`${__dirname}/public/`));
 
 app.use("/infos", (req, res) => {
-  addToRequestQueue(
-    req,
-    res,
-    "infos",
-    getEmailsInfos(req.query.from, req.query.to)
-  );
+  addToRequestQueue(req, res, "infos", getEmailsInfos(req.body));
 });
 
 app.use("/mail", (req, res) => {
-  addToRequestQueue(req, res, "mail", getEmail(req.query.uid));
+  addToRequestQueue(req, res, "mail", getEmail(req.body));
+});
+
+app.use("/send", (req, res) => {
+  addToRequestQueue(req, res, "mail", sendMail(req.body));
 });
 
 app.listen(port, () => {

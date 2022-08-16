@@ -31,12 +31,7 @@
         </MailArticle>
       </div>
     </div>
-    <div
-      id="resizeBar"
-      ref="resizeBar"
-      @mousedown="onDragStart"
-      :class="{ resizing: resizeInfos }"
-    ></div>
+    <div id="resizeBar" ref="resizeBar" @mousedown="onDragStart" :class="{ resizing: resizeInfos }"></div>
   </section>
 </template>
 
@@ -60,9 +55,24 @@ export default {
       const step = 200;
       const from = step;
 
-      let res = await fetch(
-        `http://localhost:3000/infos?from=0&to=${step - 1}`
-      );
+      let res = await fetch("http://localhost:3000/infos", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json; charset=UTF-8",
+        },
+        body: JSON.stringify({
+          auth: {
+            user: process.env.VUE_APP_USER_MAIL,
+            pass: process.env.VUE_APP_USER_PASSWORD,
+          },
+          host: "imap.free.fr",
+          port: 993,
+          range: {
+            from: 0,
+            to: step - 1,
+          },
+        }),
+      });
       let json = await res.json();
       return {
         boxInfos: json.box,
@@ -124,7 +134,21 @@ export default {
             html: cache,
           });
         } else {
-          fetch(`http://localhost:3000/mail?uid=${uid}`)
+          fetch("http://localhost:3000/mail", {
+            method: "POST",
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+            },
+            body: JSON.stringify({
+              auth: {
+                user: process.env.VUE_APP_USER_MAIL,
+                pass: process.env.VUE_APP_USER_PASSWORD,
+              },
+              host: "imap.free.fr",
+              port: 993,
+              uid: uid,
+            }),
+          })
             .then((res) => res.json())
             .then((json) => {
               sessionStorage.setItem(uid, json.html);
@@ -150,8 +174,7 @@ export default {
         this.idInSessionStorage.push(uid);
         if (new Set(this.idInSessionStorage).size > 10) {
           let oldUid = this.idInSessionStorage.shift();
-          if (!this.idInSessionStorage.includes(oldUid))
-            sessionStorage.removeItem(oldUid);
+          if (!this.idInSessionStorage.includes(oldUid)) sessionStorage.removeItem(oldUid);
         }
       }
     },
@@ -179,7 +202,25 @@ export default {
         this.fetchMailsOptions.canFetch = await new Promise((resolve) => {
           if (from < total) {
             let to = from + step - 1;
-            fetch(`http://localhost:3000/infos?from=${from}&to=${to}`)
+
+            fetch("http://localhost:3000/infos", {
+              method: "POST",
+              headers: {
+                "Content-type": "application/json; charset=UTF-8",
+              },
+              body: JSON.stringify({
+                auth: {
+                  user: process.env.VUE_APP_USER_MAIL,
+                  pass: process.env.VUE_APP_USER_PASSWORD,
+                },
+                host: "imap.free.fr",
+                port: 993,
+                range: {
+                  from,
+                  to,
+                },
+              }),
+            })
               .then((res) => res.json())
               .then((json) => {
                 this.fetchMailsOptions.from += step;
@@ -204,23 +245,15 @@ export default {
     },
     onDrag: function (e) {
       let { initLeft, lower, upper, width } = this.resizeInfos;
-      let newLeft =
-        Math.max(Math.min(e.clientX, upper - 1), lower + 1) - initLeft;
-      if (
-        upper - initLeft > width ||
-        newLeft < 0 ||
-        initLeft - lower > width ||
-        newLeft > 0
-      )
+      let newLeft = Math.max(Math.min(e.clientX, upper - 1), lower + 1) - initLeft;
+      if (upper - initLeft > width || newLeft < 0 || initLeft - lower > width || newLeft > 0)
         this.$refs.resizeBar.style.left = `${newLeft}px`;
     },
     onDragStart: function () {
       this.resizeInfos = {
         initLeft: Math.round(this.$refs.resizeBar.getBoundingClientRect().left),
         width: this.$refs.resizeBar.getBoundingClientRect().width,
-        lower:
-          this.$refs.section.getBoundingClientRect().left +
-          this.getValueFromPx(this.resizeBounds.lower),
+        lower: this.$refs.section.getBoundingClientRect().left + this.getValueFromPx(this.resizeBounds.lower),
         upper: this.displayRight - this.getValueFromPx(this.resizeBounds.upper),
       };
       this.addResizeEvents();

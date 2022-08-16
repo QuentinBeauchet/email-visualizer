@@ -1,4 +1,4 @@
-var mimelib = require("mimelib");
+var quotedPrintable = require("quoted-printable");
 
 /**
  * Decode the buffer with the informations given by it's message attribute part.
@@ -8,11 +8,8 @@ var mimelib = require("mimelib");
  * @returns The decoded String representation of the buffer.
  */
 module.exports.decodeBuffer = (buffer, encoding, type) => {
-  if (encoding == "QUOTED-PRINTABLE") return mimelib.decodeQuotedPrintable(buffer.toString());
-  if (encoding == "7BIT") return Buffer.from(buffer.toString(), "ascii").toString();
-  if (encoding == "BASE64" && type == "text") {
-    return Buffer.from(buffer.toString(), "base64").toString();
-  }
+  if (encoding == "QUOTED-PRINTABLE") return quotedPrintable.decode(buffer.toString());
+  if (encoding == "BASE64" && type == "text") return Buffer.from(buffer.toString(), "base64").toString();
   return buffer.toString();
 };
 
