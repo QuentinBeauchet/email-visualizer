@@ -8,22 +8,13 @@
     />
     <div id="content">
       <div id="L1" v-if="!isPinned">
-        <span id="sender">{{
-          mail.header.from.name || mail.header.from.address
-        }}</span>
-        <SVGStatus
-          v-if="isVisible"
-          @pinned="onPinned"
-          @status-change="onStatusChange"
-        />
+        <span id="sender">{{ mail.header.from.name || mail.header.from.address }}</span>
+        <SVGStatus v-if="isVisible" @pinned="onPinned" @status-change="onStatusChange" />
         <SVGPin v-if="isVisible" :pinned="isPinned" @pinned="onPinned" />
       </div>
       <div id="L2">
         <span id="subject">{{ mail.header.subject }}</span>
-        <SVGStatus
-          v-if="isVisible && isPinned"
-          @status-change="onStatusChange"
-        />
+        <SVGStatus v-if="isVisible && isPinned" @status-change="onStatusChange" />
         <SVGPin v-if="isPinned" :pinned="isPinned" @pinned="onPinned" />
         <span id="date" v-if="!isPinned">{{ getDateString(mail.date) }}</span>
       </div>
@@ -75,20 +66,10 @@ export default {
         6: "Sunday",
       };
 
-      if (msSinceThen < getDayInMs(1))
-        return `${date.getHours()}:${date
-          .getMinutes()
-          .toString()
-          .padStart(2, "0")}`;
+      if (msSinceThen < getDayInMs(1)) return `${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")}`;
       if (msSinceThen < getDayInMs(7))
-        return `${getDayString[date.getDay()]} ${date.getHours()}:${date
-          .getMinutes()
-          .toString()
-          .padStart(2, "0")}`;
-      if (msSinceThen < getDayInMs(30))
-        return `${
-          getDayString[date.getDay()]
-        } ${date.getDate()}/${date.getMonth()}`;
+        return `${getDayString[date.getDay()]} ${date.getHours()}:${date.getMinutes().toString().padStart(2, "0")}`;
+      if (msSinceThen < getDayInMs(30)) return `${getDayString[date.getDay()]} ${date.getDate()}/${date.getMonth()}`;
       return `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`;
     },
     onPinned: function (pinned) {

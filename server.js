@@ -1,4 +1,4 @@
-let { getEmailsInfos, getEmail, sendMail } = require("./private/customImap.js");
+let { getEmailsInfos, getEmail, sendMail, isIMAPAuthValid, isSMTPAuthValid } = require("./private/customImap.js");
 
 const express = require("express");
 var cors = require("cors");
@@ -7,27 +7,26 @@ const path = `${__dirname}/dist/`;
 const app = express();
 const port = 3000;
 
-const queues = {
-  infos: [
-    new Promise((resolve) => {
-      resolve();
-    }),
-  ],
-  mail: [
-    new Promise((resolve) => {
-      resolve();
-    }),
-  ],
-};
+const queues = ["infos", "mail", "send", "authIMAP", "authSMTP"].reduce(
+  (obj, key) => ({
+    ...obj,
+    [key]: [
+      new Promise((resolve) => {
+        resolve();
+      }),
+    ],
+  }),
+  {}
+);
 
 function addToRequestQueue(req, res, queue, promise) {
   let prev = queues[queue].shift();
   if (prev) {
     prev.then(() => {
-      promise.then((r) => res.send(r));
+      promise.then(({ status, data }) => res.status(status).send(data));
       queues[queue].push(promise);
     });
-  } else res.redirect(req.originalUrl);
+  } else addToRequestQueue(req, res, queue, promise);
 }
 
 app.use(cors());
@@ -46,7 +45,15 @@ app.use("/mail", (req, res) => {
 });
 
 app.use("/send", (req, res) => {
-  addToRequestQueue(req, res, "mail", sendMail(req.body));
+  addToRequestQueue(req, res, "send", sendMail(req.body));
+});
+
+app.use("/authIMAP", (req, res) => {
+  addToRequestQueue(req, res, "authIMAP", isIMAPAuthValid(req.body));
+});
+
+app.use("/authSMTP", (req, res) => {
+  addToRequestQueue(req, res, "authSMTP", isSMTPAuthValid(req.body));
 });
 
 app.listen(port, () => {

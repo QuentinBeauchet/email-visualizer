@@ -1,30 +1,41 @@
 require("dotenv").config();
 var Imap = require("node-imap");
 const simpleParser = require("mailparser").simpleParser;
-let { decodeBuffer, flattenAttribute, getHTMLContent } = require("./utils.js");
+let { decodeBuffer, flattenAttribute, getHTMLContent, getErrorResponse } = require("./utils.js");
 
 module.exports.getEmailsInfos = ({ auth, host, port, range }) => {
-  let { from = 10, to = 0 } = range;
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     var imap = new Imap({
-      user: auth.user,
-      password: auth.pass,
+      user: auth?.user,
+      password: auth?.pass,
       host,
       port,
       tls: true,
     });
-    imap.once("error", reject);
-    imap.once("end", () => console.log("Connection ended"));
+    imap.once("error", (err) => {
+      resolve(getErrorResponse(err));
+    });
+    imap.once("end", () => {
+      imap.removeAllListeners();
+      console.log("Connection ended");
+    });
     imap.once("ready", () => {
       imap.openBox("INBOX", true, (err, box) => {
         if (err) {
-          reject(err);
+          resolve(getErrorResponse(err));
           return;
         }
-        console.log(`getEmailsInfos => ${Math.max(box.messages.total - to, 1)}:${box.messages.total - from}`);
-        var f = imap.seq.fetch(`${Math.max(box.messages.total - to, 1)}:${box.messages.total - from}`, {
-          bodies: ["HEADER.FIELDS (FROM SUBJECT TO)"],
-        });
+        console.log(
+          `getEmailsInfos => ${Math.max(box.messages.total - (range?.to || 10), 1)}:${
+            box.messages.total - (range?.from || 0)
+          }`
+        );
+        var f = imap.seq.fetch(
+          `${Math.max(box.messages.total - (range?.to || 10), 1)}:${box.messages.total - (range?.from || 0)}`,
+          {
+            bodies: ["HEADER.FIELDS (FROM SUBJECT TO)"],
+          }
+        );
         var messages = [];
         f.on("message", (msg) => {
           messages.push(
@@ -61,15 +72,17 @@ module.exports.getEmailsInfos = ({ auth, host, port, range }) => {
         f.once("end", async () => {
           let mails = await Promise.all(messages.reverse());
           f.removeAllListeners();
-          imap.removeAllListeners();
           imap.end();
           resolve({
-            box: {
-              name: box.name,
-              flags: box.flags,
-              messages: box.messages.total,
+            status: 200,
+            data: {
+              box: {
+                name: box.name,
+                flags: box.flags,
+                messages: box.messages.total,
+              },
+              mails,
             },
-            mails,
           });
         });
       });
@@ -80,20 +93,25 @@ module.exports.getEmailsInfos = ({ auth, host, port, range }) => {
 };
 
 module.exports.getEmail = ({ auth, host, port, uid }) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     var imap = new Imap({
-      user: auth.user,
-      password: auth.pass,
+      user: auth?.user,
+      password: auth?.pass,
       host,
       port,
       tls: true,
     });
-    imap.once("error", reject);
-    imap.once("end", () => console.log("Connection ended"));
+    imap.once("error", (err) => {
+      resolve(getErrorResponse(err));
+    });
+    imap.once("end", () => {
+      imap.removeAllListeners();
+      console.log("Connection ended");
+    });
     imap.once("ready", () => {
       imap.openBox("INBOX", true, (err) => {
         if (err) {
-          reject(err);
+          resolve(getErrorResponse(err));
           return;
         }
         console.log(`getEmail => ${uid}`);
@@ -120,24 +138,28 @@ module.exports.getEmail = ({ auth, host, port, uid }) => {
             let html = await body;
             msg.removeAllListeners();
             resolve({
-              header: {
-                subject: parsed.subject,
-                from: parsed.from.value[0],
-                to: parsed.to.value,
+              status: 200,
+              data: {
+                header: {
+                  subject: parsed.subject,
+                  from: parsed.from.value[0],
+                  to: parsed.to.value,
+                },
+                html,
+                uid: attributes.uid,
+                date: attributes.date,
+                flags: attributes.flags,
               },
-              html,
-              uid: attributes.uid,
-              date: attributes.date,
-              flags: attributes.flags,
             });
           });
 
-          msg.on("error", () => reject({}));
+          msg.on("error", (err) => {
+            resolve(getErrorResponse(err));
+          });
         });
 
         f.once("end", async () => {
           f.removeAllListeners();
-          imap.removeAllListeners();
           imap.end();
         });
       });
@@ -154,7 +176,7 @@ module.exports.getEmail = ({ auth, host, port, uid }) => {
  * @returns A promise containing and HTML page.
  */
 function readMsgBody(imap, attr) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     let parts = flattenAttribute(attr.struct).reduce((acc, part) => {
       acc[part.partID] = part;
       return acc;
@@ -175,10 +197,39 @@ function readMsgBody(imap, attr) {
         });
       });
       msg.on("end", () => resolve(getHTMLContent(parts)));
-      msg.on("error", () => reject({}));
+      msg.on("error", () => resolve(""));
     });
     f.once("end", () => {
       f.removeAllListeners();
     });
   });
 }
+
+module.exports.isIMAPAuthValid = ({ auth, host, port }) => {
+  return new Promise((resolve) => {
+    var imap = new Imap({
+      user: auth?.user,
+      password: auth?.pass,
+      host,
+      port,
+      tls: true,
+    });
+    imap.once("error", (err) => {
+      resolve(getErrorResponse(err));
+      imap.removeAllListeners();
+      imap.end();
+    });
+    imap.once("end", () => {
+      imap.removeAllListeners();
+      console.log("Connection ended");
+    });
+    imap.once("ready", () => {
+      resolve({
+        status: 200,
+      });
+      imap.end();
+    });
+
+    imap.connect();
+  });
+};

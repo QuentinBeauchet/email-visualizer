@@ -6,13 +6,8 @@
     <OptionsHeaderDeletion v-if="mail" />
     <OptionsHeaderSpam v-if="mail" />
     <OptionsHeaderBlockSender v-if="mail" />
-    <OptionsHeaderPin
-      v-if="mail"
-      @pinned="onPinned"
-      :pinned="pinned"
-      :key="mail.uid"
-    />
-    <OptionsHeaderChangeStatus :is-seen="isSeen" />
+    <OptionsHeaderPin v-if="mail" @pinned="onPinned" :pinned="pinned" :key="mail.uid" />
+    <OptionsHeaderChangeStatus v-if="mail" :is-seen="isSeen" />
   </header>
 </template>
 

@@ -1,4 +1,5 @@
 var quotedPrintable = require("quoted-printable");
+var utf8 = require("utf8");
 
 /**
  * Decode the buffer with the informations given by it's message attribute part.
@@ -8,7 +9,7 @@ var quotedPrintable = require("quoted-printable");
  * @returns The decoded String representation of the buffer.
  */
 module.exports.decodeBuffer = (buffer, encoding, type) => {
-  if (encoding == "QUOTED-PRINTABLE") return quotedPrintable.decode(buffer.toString());
+  if (encoding == "QUOTED-PRINTABLE") return utf8.decode(quotedPrintable.decode(buffer.toString()));
   if (encoding == "BASE64" && type == "text") return Buffer.from(buffer.toString(), "base64").toString();
   return buffer.toString();
 };
@@ -55,4 +56,30 @@ module.exports.getHTMLContent = (parts) => {
     HTML = HTML.replace(`cid:${sourceID}`, sources[sourceID]);
   }
   return HTML || `<html><head></head><body><pre style="white-space: break-spaces;">${noHTML}</pre></body></html>`;
+};
+
+/**
+ * Get the status and the message for a corresponding error.
+ */
+module.exports.getErrorResponse = (err) => {
+  if (["EAUTH", "EENVELOPE"].includes(err?.code) || (err?.type == "no" && err?.source == "authentication")) {
+    return {
+      status: 403,
+      data: "Bad credentials",
+    };
+  }
+  if (
+    ["ESOCKET", "EDNS", "ERR_SSL_WRONG_VERSION_NUMBER", "ECONNREFUSED", "ENOTFOUND"].includes(err?.code) ||
+    ["Unexpected socket close"].some((el) => err?.message.includes(el))
+  ) {
+    return {
+      status: 400,
+      data: "Invalid server informations",
+    };
+  }
+
+  return {
+    status: 403,
+    data: err,
+  };
 };
