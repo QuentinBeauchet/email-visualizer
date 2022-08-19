@@ -9,9 +9,13 @@ var utf8 = require("utf8");
  * @returns The decoded String representation of the buffer.
  */
 module.exports.decodeBuffer = (buffer, encoding, type) => {
-  if (encoding == "QUOTED-PRINTABLE") return utf8.decode(quotedPrintable.decode(buffer.toString()));
-  if (encoding == "BASE64" && type == "text") return Buffer.from(buffer.toString(), "base64").toString();
-  return buffer.toString();
+  try {
+    if (encoding == "QUOTED-PRINTABLE") return utf8.decode(quotedPrintable.decode(buffer.toString()));
+    if (encoding == "BASE64" && type == "text") return Buffer.from(buffer.toString(), "base64").toString();
+    return buffer.toString();
+  } catch {
+    return buffer.toString();
+  }
 };
 
 /**

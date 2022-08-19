@@ -1,12 +1,13 @@
 <template>
-  <ConnexionHeader />
+  <ConnexionHeader @connected="onConnected" />
   <OptionsHeader
     @expansion="onExpansion"
     @pinned="onPinned"
     :mail="displayedMail"
     :pinned="pinneds.has(displayedMail?.uid)"
+    v-if="credentials"
   />
-  <main>
+  <main v-if="credentials">
     <section id="menu" v-if="expanded"></section>
     <Suspense>
       <EmailList
@@ -16,10 +17,9 @@
         :resize-bounds="resizeBounds"
         @resize="onResize"
         :display-right="getDisplayRight()"
+        :credentials="credentials"
       />
-      <template #fallback
-        ><LoadingBar :resize-bounds="resizeBounds"
-      /></template>
+      <template #fallback><LoadingBar :resize-bounds="resizeBounds" /></template>
     </Suspense>
     <DisplayArea
       id="displayArea"
@@ -36,7 +36,7 @@
 import EmailList from "./components/emailList/EmailList.vue";
 import LoadingBar from "./components/svg/Loading.vue";
 import OptionsHeader from "./components/optionHeader/OptionsHeader.vue";
-import ConnexionHeader from "./components/mainHeader/Header.vue";
+import ConnexionHeader from "./components/mainHeader/mainHeader.vue";
 import DisplayArea from "./components/displayArea/DisplayArea.vue";
 
 export default {
@@ -50,6 +50,7 @@ export default {
   },
   data: function () {
     return {
+      credentials: undefined,
       displayedMail: undefined,
       expanded: true,
       pinneds: new Set(),
@@ -80,6 +81,12 @@ export default {
     getDisplayRight: function () {
       return this.$refs.display?.getBoundingClientRect().right;
     },
+    onConnected: function (credentials) {
+      this.credentials = undefined;
+      this.$nextTick(() => {
+        this.credentials = credentials;
+      });
+    },
   },
 };
 </script>
@@ -92,6 +99,7 @@ body {
   margin: 0;
   display: flex;
   flex-direction: column;
+  background: var(--medium-grey);
 }
 </style>
 

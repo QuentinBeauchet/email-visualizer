@@ -15,8 +15,8 @@
         :class="{ resizing }"
       >
       </iframe>
-      <SVGError v-else id="error" />
-      <Loading v-if="mail.html && !loaded" :resize-bounds="resizeBounds" />
+      <Loading v-if="!loaded" :resize-bounds="resizeBounds" />
+      <SVGError v-if="loaded && mail.html === null" id="error" />
       <DisplayAreaReply />
     </div>
   </section>
@@ -77,8 +77,7 @@ export default {
   updated: function () {
     if (this.$refs.iframe) {
       this.$nextTick(() => {
-        let parentNode =
-          this.$refs.iframe.contentWindow.document.body?.parentNode;
+        let parentNode = this.$refs.iframe.contentWindow.document.body?.parentNode;
         if (parentNode) this.resizeObserver.observe(parentNode);
       });
     }
@@ -87,10 +86,13 @@ export default {
     mail: function () {
       this.resizeObserver.disconnect();
       if (this.$refs.iframe) this.$refs.iframe.style.width = "";
+
       this.loaded = false;
-      setTimeout(() => {
-        this.loaded = true;
-      }, 800);
+      if (this.mail.html !== undefined) {
+        setTimeout(() => {
+          this.loaded = true;
+        }, 800);
+      }
     },
     resizing: function () {
       this.onResize();

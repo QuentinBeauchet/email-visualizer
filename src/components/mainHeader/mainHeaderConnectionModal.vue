@@ -1,5 +1,5 @@
 <template>
-  <div @click="hideConnection" id="parent">
+  <div @click="onClick" id="parent">
     <form @click.stop id="modal" ref="form">
       <div id="auth">
         <label for="email">Email</label>
@@ -22,13 +22,13 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
               <path d="M17 13v-13h-2v5h-2v-3h-2v7h-2v-9h-2v13h-6l11 11 11-11z" />
             </svg>
-            <h1>IMTP</h1>
+            <h1>imap</h1>
           </div>
-          <label for="imtpHost">Host</label>
-          <input v-model="imtpHost" type="text" id="imtpHost" autocomplete="on" :tabindex="getTabIndex()" />
-          <label for="imtpPort">Port</label>
-          <input v-model="imtpPort" type="number" min="0" id="imtpPort" autocomplete="on" :tabindex="getTabIndex()" />
-          <SVGServerAuth :status="imtpStatus" />
+          <label for="imapHost">Host</label>
+          <input v-model="imapHost" type="text" id="imapHost" autocomplete="on" :tabindex="getTabIndex()" />
+          <label for="imapPort">Port</label>
+          <input v-model="imapPort" type="number" min="0" id="imapPort" autocomplete="on" :tabindex="getTabIndex()" />
+          <SVGServerAuth :status="imapStatus" />
         </section>
         <section>
           <div>
@@ -55,9 +55,10 @@ import SVGServerAuth from "../svg/SVGServerAuth.vue";
 import SVGShowPassword from "../svg/SVGShowPassword.vue";
 export default {
   name: "ConnexionModal",
+  emits: ["hidden", "connected"],
   methods: {
-    hideConnection: function () {
-      this.$parent.hideConnection();
+    onClick: function () {
+      this.$emit("hidden");
     },
     connect: function () {
       const getFetchOptions = (type) => {
@@ -79,18 +80,28 @@ export default {
       };
 
       if (this.$refs.form.reportValidity()) {
-        this.imtpStatus = -1;
+        this.imapStatus = -1;
         this.smtpStatus = -1;
         Promise.all([
           fetch("http://localhost:3000/authIMAP", getFetchOptions("imap")),
           fetch("http://localhost:3000/authSMTP", getFetchOptions("smtp")),
         ])
           .then(([{ status: imap }, { status: smtp }]) => {
-            this.imtpStatus = imap;
+            this.imapStatus = imap;
             this.smtpStatus = smtp;
+            if (this.imapStatus == 200 && this.smtpStatus == 200) {
+              this.$emit("connected", {
+                email: this.email,
+                password: this.password,
+                server: this.presets[this.selected],
+              });
+              setTimeout(() => {
+                this.$emit("hidden");
+              }, 200);
+            }
           })
           .catch(() => {
-            this.imtpStatus = 500;
+            this.imapStatus = 500;
             this.smtpStatus = 500;
           });
       }
@@ -108,9 +119,9 @@ export default {
       password: process.env.VUE_APP_USER_PASSWORD,
       isPasswordVisible: false,
       selected: "Custom",
-      imtpHost: "imap.free.fr",
-      imtpPort: 993,
-      imtpStatus: 0,
+      imapHost: "imap.free.fr",
+      imapPort: 993,
+      imapStatus: 0,
       smtpHost: "smtp.free.fr",
       smtpPort: 587,
       smtpStatus: 0,
@@ -120,7 +131,7 @@ export default {
     presets: function () {
       return {
         Custom: {
-          imap: { host: this.imtpHost, port: this.imtpPort },
+          imap: { host: this.imapHost, port: this.imapPort },
           smtp: { host: this.smtpHost, port: this.smtpPort },
         },
         Gmail: {

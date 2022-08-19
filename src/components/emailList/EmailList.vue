@@ -11,7 +11,7 @@
           @set-selection-state="onSetSelectionState"
         />
         <span>Filter</span>
-        <span>{{ this.mailsInfos.length }} / {{ this.boxInfos.messages }}</span>
+        <EmailListFetchProgression :current="mailsInfos.length" :max="boxInfos.messages" />
       </header>
       <div id="list" @scroll="onScroll">
         <MailArticle
@@ -39,6 +39,7 @@
 import MailArticle from "./Article.vue";
 import SVGError from "../svg/SVGError.vue";
 import ArticleSelection from "./Selection.vue";
+import EmailListFetchProgression from "./emailListFetchProgression.vue";
 
 export default {
   name: "EmailList",
@@ -46,9 +47,10 @@ export default {
     MailArticle,
     SVGError,
     ArticleSelection,
+    EmailListFetchProgression,
   },
   emits: ["displayingMail", "pinned", "resize"],
-  async setup() {
+  async setup(props) {
     try {
       console.log("SETUP FETCH");
       sessionStorage.clear();
@@ -62,11 +64,11 @@ export default {
         },
         body: JSON.stringify({
           auth: {
-            user: process.env.VUE_APP_USER_MAIL,
-            pass: process.env.VUE_APP_USER_PASSWORD,
+            user: props.credentials.email,
+            pass: props.credentials.password,
           },
-          host: "imap.free.fr",
-          port: 993,
+          host: props.credentials.server.imap.host,
+          port: props.credentials.server.imap.port,
           range: {
             from: 0,
             to: step - 1,
@@ -86,6 +88,7 @@ export default {
         },
       };
     } catch (e) {
+      console.log(e);
       return { fetchError: true };
     }
   },
@@ -102,6 +105,7 @@ export default {
     pinneds: Set,
     resizeBounds: Object,
     displayRight: Number,
+    credentials: Object,
   },
   computed: {
     mailsList: function () {
@@ -134,6 +138,13 @@ export default {
             html: cache,
           });
         } else {
+          this.$emit("displayingMail", {
+            uid,
+            flags,
+            header,
+            date,
+            html: undefined,
+          });
           fetch("http://localhost:3000/mail", {
             method: "POST",
             headers: {
@@ -141,11 +152,11 @@ export default {
             },
             body: JSON.stringify({
               auth: {
-                user: process.env.VUE_APP_USER_MAIL,
-                pass: process.env.VUE_APP_USER_PASSWORD,
+                user: this.credentials.email,
+                pass: this.credentials.password,
               },
-              host: "imap.free.fr",
-              port: 993,
+              host: this.credentials.server.imap.host,
+              port: this.credentials.server.imap.port,
               uid: uid,
             }),
           })
@@ -166,7 +177,7 @@ export default {
                 flags,
                 header,
                 date,
-                html: undefined,
+                html: null,
               });
             });
         }
@@ -210,11 +221,11 @@ export default {
               },
               body: JSON.stringify({
                 auth: {
-                  user: process.env.VUE_APP_USER_MAIL,
-                  pass: process.env.VUE_APP_USER_PASSWORD,
+                  user: this.credentials.email,
+                  pass: this.credentials.password,
                 },
-                host: "imap.free.fr",
-                port: 993,
+                host: this.credentials.server.imap.host,
+                port: this.credentials.server.imap.port,
                 range: {
                   from,
                   to,

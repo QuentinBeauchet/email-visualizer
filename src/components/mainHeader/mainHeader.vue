@@ -4,30 +4,35 @@
     <div>
       <button @click="showConnection">Sign In</button>
     </div>
-    <Connexion v-show="isConnexionVisible" />
+    <mainHeaderConnectionModal v-show="isConnexionModalVisible" @hidden="hideConnection" @connected="onConnected" />
   </header>
 </template>
 
 <script>
-import Connexion from "./Connexion.vue";
+import mainHeaderConnectionModal from "./mainHeaderConnectionModal.vue";
 
 export default {
   name: "ConnexionHeader",
+  emits: ["connected"],
   components: {
-    Connexion,
+    mainHeaderConnectionModal,
   },
   methods: {
     showConnection: function () {
-      this.isConnexionVisible = true;
+      this.isConnexionModalVisible = true;
     },
     hideConnection: function () {
-      this.isConnexionVisible = false;
+      this.isConnexionModalVisible = false;
+    },
+    onConnected: function (credentials) {
+      this.$emit("connected", credentials);
+      this.email = credentials.email;
     },
   },
   data: function () {
     return {
-      email: "quentinbeauchet@free.fr",
-      isConnexionVisible: false,
+      email: "",
+      isConnexionModalVisible: true,
     };
   },
 };
@@ -50,11 +55,10 @@ h1 {
   font-weight: bold;
   font-size: 2rem;
   color: var(--light-txt-color);
-  text-shadow: 1px 1px 1px var(--light-blue), 1px 2px 1px var(--light-blue),
-    1px 3px 1px var(--light-blue), 1px 4px 1px var(--light-blue),
-    1px 5px 1px var(--light-blue), 1px 6px 1px var(--light-blue),
-    1px 10px 5px rgba(16, 16, 16, 0.5), 1px 15px 10px rgba(16, 16, 16, 0.4),
-    1px 20px 30px rgba(16, 16, 16, 0.3), 1px 25px 50px rgba(16, 16, 16, 0.2);
+  text-shadow: 1px 1px 1px var(--light-blue), 1px 2px 1px var(--light-blue), 1px 3px 1px var(--light-blue),
+    1px 4px 1px var(--light-blue), 1px 5px 1px var(--light-blue), 1px 6px 1px var(--light-blue),
+    1px 10px 5px rgba(16, 16, 16, 0.5), 1px 15px 10px rgba(16, 16, 16, 0.4), 1px 20px 30px rgba(16, 16, 16, 0.3),
+    1px 25px 50px rgba(16, 16, 16, 0.2);
   font-family: "Amatic SC", cursive;
 }
 

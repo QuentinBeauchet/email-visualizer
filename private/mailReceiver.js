@@ -45,13 +45,13 @@ module.exports.getEmailsInfos = ({ auth, host, port, range }) => {
 
               msg.on("body", (stream) => {
                 stream.on("data", (chunk) => buffer.push(chunk));
-                stream.on("end", () => (header = Buffer.concat(buffer)));
+                stream.on("end", () => (header = simpleParser(Buffer.concat(buffer), {})));
               });
 
               msg.on("attributes", (attr) => (attributes = attr));
 
               msg.on("end", async () => {
-                let parsed = await simpleParser(header, {});
+                let parsed = await header;
                 msg.removeAllListeners();
                 resolveMessage({
                   header: {
@@ -116,16 +116,16 @@ module.exports.getEmail = ({ auth, host, port, uid }) => {
         }
         console.log(`getEmail => ${uid}`);
         var f = imap.fetch(uid, {
-          bodies: ["HEADER.FIELDS (FROM SUBJECT TO)", "TEXT"],
+          bodies: ["HEADER.FIELDS (FROM SUBJECT TO)"],
           struct: true,
         });
         f.once("message", (msg) => {
           const buffer = [];
           var header, body, attributes;
 
-          msg.on("body", (stream, info) => {
-            if (info.which == "TEXT") header = Buffer.concat(buffer);
+          msg.on("body", (stream) => {
             stream.on("data", (chunk) => buffer.push(chunk));
+            stream.on("end", () => (header = simpleParser(Buffer.concat(buffer), {})));
           });
 
           msg.on("attributes", (attr) => {
@@ -134,7 +134,7 @@ module.exports.getEmail = ({ auth, host, port, uid }) => {
           });
 
           msg.on("end", async () => {
-            let parsed = await simpleParser(header, {});
+            let parsed = await header;
             let html = await body;
             msg.removeAllListeners();
             resolve({
