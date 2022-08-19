@@ -13,10 +13,11 @@
         <span>Filter</span>
         <EmailListFetchProgression :current="mailsInfos.length" :max="boxInfos.messages" />
       </header>
-      <div id="list" @scroll="onScroll">
+      <div id="list" @scroll="onScroll" ref="listContainer">
         <MailArticle
           v-for="mail in mailsList"
           :key="mail.uid"
+          ref="list"
           @mouseover="showButtons(mail.uid)"
           @mouseleave="hideButtons"
           @click="displayMail(mail)"
@@ -29,6 +30,7 @@
           @set-selection-state="onSetSelectionState"
         >
         </MailArticle>
+        <Loading v-if="mailsInfos.length != boxInfos.messages" :resize-bounds="resizeBounds" :as-article="true" />
       </div>
     </div>
     <div id="resizeBar" ref="resizeBar" @mousedown="onDragStart" :class="{ resizing: resizeInfos }"></div>
@@ -36,10 +38,13 @@
 </template>
 
 <script>
+import { ref } from "vue";
+
 import MailArticle from "./Article.vue";
 import SVGError from "../svg/SVGError.vue";
 import ArticleSelection from "./Selection.vue";
 import EmailListFetchProgression from "./emailListFetchProgression.vue";
+import Loading from "../svg/Loading.vue";
 
 export default {
   name: "EmailList",
@@ -48,6 +53,7 @@ export default {
     SVGError,
     ArticleSelection,
     EmailListFetchProgression,
+    Loading,
   },
   emits: ["displayingMail", "pinned", "resize"],
   async setup(props) {
@@ -76,9 +82,10 @@ export default {
         }),
       });
       let json = await res.json();
+
       return {
-        boxInfos: json.box,
-        mailsInfos: json.mails,
+        boxInfos: ref(json.box),
+        mailsInfos: ref(json.mails),
         fetchError: false,
         fetchMailsOptions: {
           from,

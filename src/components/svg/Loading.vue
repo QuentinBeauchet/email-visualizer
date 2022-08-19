@@ -1,6 +1,6 @@
 <template>
-  <div id="wrapper">
-    <div class="lds-ellipsis">
+  <div id="wrapper" :class="{ C1: asArticle }">
+    <div class="lds-ellipsis" :class="{ C2: asArticle }">
       <div></div>
       <div></div>
       <div></div>
@@ -14,6 +14,7 @@ export default {
   name: "LoadingBar",
   props: {
     resizeBounds: Object,
+    asArticle: Boolean,
   },
 };
 </script>
@@ -29,6 +30,19 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.C1 {
+  max-width: initial !important;
+  width: auto !important;
+  height: auto !important;
+  background: var(--light-txt-color);
+}
+
+.C2 {
+  height: 80px !important;
+  height: 65px !important;
+  top: -7.5px !important;
 }
 
 .lds-ellipsis {

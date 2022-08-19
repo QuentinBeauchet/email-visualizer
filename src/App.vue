@@ -83,6 +83,8 @@ export default {
     },
     onConnected: function (credentials) {
       this.credentials = undefined;
+      this.displayedMail = undefined;
+      this.pinneds = new Set();
       this.$nextTick(() => {
         this.credentials = credentials;
       });
