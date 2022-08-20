@@ -1,4 +1,11 @@
-let { getEmailsInfos, getEmail, sendMail, isIMAPAuthValid, isSMTPAuthValid } = require("./private/customImap.js");
+let {
+  getEmailsInfos,
+  getEmail,
+  sendMail,
+  isIMAPAuthValid,
+  isSMTPAuthValid,
+  getBoxes,
+} = require("./private/customImap.js");
 
 const express = require("express");
 var cors = require("cors");
@@ -7,7 +14,7 @@ const path = `${__dirname}/dist/`;
 const app = express();
 const port = 3000;
 
-const queues = ["infos", "mail", "send", "authIMAP", "authSMTP"].reduce(
+const queues = ["infos", "mail", "send", "authIMAP", "authSMTP", "getBoxes"].reduce(
   (obj, key) => ({
     ...obj,
     [key]: [
@@ -54,6 +61,10 @@ app.use("/authIMAP", (req, res) => {
 
 app.use("/authSMTP", (req, res) => {
   addToRequestQueue(req, res, "authSMTP", isSMTPAuthValid(req.body));
+});
+
+app.use("/boxes", (req, res) => {
+  addToRequestQueue(req, res, "getBoxes", getBoxes(req.body));
 });
 
 app.listen(port, () => {

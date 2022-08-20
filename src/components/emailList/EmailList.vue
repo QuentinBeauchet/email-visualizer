@@ -10,7 +10,7 @@
           id="selectorAll"
           @set-selection-state="onSetSelectionState"
         />
-        <span>Filter</span>
+        <span> Filter </span>
         <EmailListFetchProgression :current="mailsInfos.length" :max="boxInfos.messages" />
       </header>
       <div id="list" @scroll="onScroll" ref="listContainer">
@@ -58,12 +58,11 @@ export default {
   emits: ["displayingMail", "pinned", "resize"],
   async setup(props) {
     try {
-      console.log("SETUP FETCH");
       sessionStorage.clear();
       const step = 200;
       const from = step;
 
-      let res = await fetch("http://localhost:3000/infos", {
+      let res = await fetch(`${process.env.VUE_APP_API_URL || window.location.href}infos`, {
         method: "POST",
         headers: {
           "Content-type": "application/json; charset=UTF-8",
@@ -75,6 +74,7 @@ export default {
           },
           host: props.credentials.server.imap.host,
           port: props.credentials.server.imap.port,
+          box: props.box,
           range: {
             from: 0,
             to: step - 1,
@@ -113,6 +113,7 @@ export default {
     resizeBounds: Object,
     displayRight: Number,
     credentials: Object,
+    box: String,
   },
   computed: {
     mailsList: function () {
@@ -152,7 +153,7 @@ export default {
             date,
             html: undefined,
           });
-          fetch("http://localhost:3000/mail", {
+          fetch(`${process.env.VUE_APP_API_URL || window.location.href}mail`, {
             method: "POST",
             headers: {
               "Content-type": "application/json; charset=UTF-8",
@@ -164,6 +165,7 @@ export default {
               },
               host: this.credentials.server.imap.host,
               port: this.credentials.server.imap.port,
+              box: this.box,
               uid: uid,
             }),
           })
@@ -221,7 +223,7 @@ export default {
           if (from < total) {
             let to = from + step - 1;
 
-            fetch("http://localhost:3000/infos", {
+            fetch(`${process.env.VUE_APP_API_URL || window.location.href}infos`, {
               method: "POST",
               headers: {
                 "Content-type": "application/json; charset=UTF-8",
@@ -326,7 +328,7 @@ section {
 }
 
 #list {
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 header {

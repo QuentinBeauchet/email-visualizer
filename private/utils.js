@@ -87,3 +87,15 @@ module.exports.getErrorResponse = (err) => {
     data: err,
   };
 };
+
+module.exports.flattenBoxes = (boxes) => {
+  for (let box in boxes) {
+    let { delimiter, children, attribs } = boxes[box];
+    boxes[box] = {
+      delimiter,
+      children: module.exports.flattenBoxes(children),
+      openable: attribs.every((attr) => attr.toUpperCase() != "\\NOSELECT"),
+    };
+  }
+  return boxes;
+};

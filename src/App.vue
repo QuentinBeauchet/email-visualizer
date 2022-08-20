@@ -8,9 +8,13 @@
     v-if="credentials"
   />
   <main v-if="credentials">
-    <section id="menu" v-if="expanded"></section>
+    <Suspense>
+      <BoxesSelection id="menu" v-show="expanded" :credentials="credentials" @load-box="onLoadBox" />
+      <template #fallback><LoadingBar :resize-bounds="resizeBounds" /></template>
+    </Suspense>
     <Suspense>
       <EmailList
+        v-if="box"
         @displaying-mail="ondDisplayingMail"
         :pinneds="pinneds"
         @pinned="onPinned"
@@ -18,10 +22,13 @@
         @resize="onResize"
         :display-right="getDisplayRight()"
         :credentials="credentials"
+        :box="box"
       />
+      <LoadingBar :resize-bounds="resizeBounds" v-else />
       <template #fallback><LoadingBar :resize-bounds="resizeBounds" /></template>
     </Suspense>
     <DisplayArea
+      v-if="box"
       id="displayArea"
       :class="{ extendedDisplayArea: !expanded }"
       :mail="displayedMail"
@@ -38,6 +45,7 @@ import LoadingBar from "./components/svg/Loading.vue";
 import OptionsHeader from "./components/optionHeader/OptionsHeader.vue";
 import ConnexionHeader from "./components/mainHeader/mainHeader.vue";
 import DisplayArea from "./components/displayArea/DisplayArea.vue";
+import BoxesSelection from "./components/boxesSelection/BoxesSelection.vue";
 
 export default {
   name: "App",
@@ -47,6 +55,7 @@ export default {
     OptionsHeader,
     ConnexionHeader,
     DisplayArea,
+    BoxesSelection,
   },
   data: function () {
     return {
@@ -59,6 +68,7 @@ export default {
         upper: "450px",
       },
       resizing: false,
+      box: "INBOX",
     };
   },
   methods: {
@@ -83,11 +93,21 @@ export default {
     },
     onConnected: function (credentials) {
       this.credentials = undefined;
-      this.displayedMail = undefined;
-      this.pinneds = new Set();
       this.$nextTick(() => {
         this.credentials = credentials;
       });
+      this.resetData();
+    },
+    onLoadBox: function (box) {
+      this.box = undefined;
+      this.$nextTick(() => {
+        this.box = box;
+      });
+      this.resetData();
+    },
+    resetData: function () {
+      this.displayedMail = undefined;
+      this.pinneds = new Set();
     },
   },
 };

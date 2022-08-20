@@ -63,7 +63,7 @@ export default {
 header {
   display: flex;
   align-items: center;
-  padding: 0.1rem;
+  padding: 2px;
   background-color: var(--medium-grey);
   gap: 0.2rem;
 }

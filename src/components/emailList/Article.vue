@@ -92,7 +92,7 @@ export default {
 }
 
 .selected {
-  background-color: var(--lightest-blue);
+  background-color: var(--lightest-blue) !important;
 }
 
 article {

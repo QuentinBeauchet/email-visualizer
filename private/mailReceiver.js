@@ -1,9 +1,14 @@
 require("dotenv").config();
 var Imap = require("node-imap");
 const simpleParser = require("mailparser").simpleParser;
-let { decodeBuffer, flattenAttribute, getHTMLContent, getErrorResponse } = require("./utils.js");
+let { decodeBuffer, flattenAttribute, getHTMLContent, getErrorResponse, flattenBoxes } = require("./utils.js");
 
-module.exports.getEmailsInfos = ({ auth, host, port, range }) => {
+/**
+ * Return a list of mails in the range.
+ * @param {{ auth, host, port, range }} params
+ * @returns
+ */
+module.exports.getEmailsInfos = ({ auth, host, port, box, range }) => {
   return new Promise((resolve) => {
     var imap = new Imap({
       user: auth?.user,
@@ -20,16 +25,33 @@ module.exports.getEmailsInfos = ({ auth, host, port, range }) => {
       console.log("Connection ended");
     });
     imap.once("ready", () => {
-      imap.openBox("INBOX", true, (err, box) => {
-        if (err) {
-          resolve(getErrorResponse(err));
-          return;
-        }
+      imap.openBox(box, true, (err, box) => {
         console.log(
           `getEmailsInfos => ${Math.max(box.messages.total - (range?.to || 10), 1)}:${
             box.messages.total - (range?.from || 0)
           }`
         );
+
+        if (err) {
+          resolve(getErrorResponse(err));
+          return;
+        }
+        if (box.messages.total == 0) {
+          resolve({
+            status: 200,
+            data: {
+              box: {
+                name: box.name,
+                flags: box.flags,
+                messages: box.messages.total,
+              },
+              mails: [],
+            },
+          });
+          imap.end();
+          return;
+        }
+
         var f = imap.seq.fetch(
           `${Math.max(box.messages.total - (range?.to || 10), 1)}:${box.messages.total - (range?.from || 0)}`,
           {
@@ -92,7 +114,7 @@ module.exports.getEmailsInfos = ({ auth, host, port, range }) => {
   });
 };
 
-module.exports.getEmail = ({ auth, host, port, uid }) => {
+module.exports.getEmail = ({ auth, host, port, box, uid }) => {
   return new Promise((resolve) => {
     var imap = new Imap({
       user: auth?.user,
@@ -109,7 +131,7 @@ module.exports.getEmail = ({ auth, host, port, uid }) => {
       console.log("Connection ended");
     });
     imap.once("ready", () => {
-      imap.openBox("INBOX", true, (err) => {
+      imap.openBox(box, true, (err) => {
         if (err) {
           resolve(getErrorResponse(err));
           return;
@@ -216,7 +238,6 @@ module.exports.isIMAPAuthValid = ({ auth, host, port }) => {
     });
     imap.once("error", (err) => {
       resolve(getErrorResponse(err));
-      imap.removeAllListeners();
       imap.end();
     });
     imap.once("end", () => {
@@ -228,6 +249,37 @@ module.exports.isIMAPAuthValid = ({ auth, host, port }) => {
         status: 200,
       });
       imap.end();
+    });
+
+    imap.connect();
+  });
+};
+
+module.exports.getBoxes = ({ auth, host, port }) => {
+  return new Promise((resolve) => {
+    var imap = new Imap({
+      user: auth?.user,
+      password: auth?.pass,
+      host,
+      port,
+      tls: true,
+    });
+    imap.once("error", (err) => {
+      resolve(getErrorResponse(err));
+      imap.end();
+    });
+    imap.once("end", () => {
+      imap.removeAllListeners();
+      console.log("Connection ended");
+    });
+    imap.once("ready", () => {
+      imap.getBoxes((err, mailboxes) => {
+        if (err) resolve(getErrorResponse(err));
+        console.log(mailboxes);
+        resolve({ status: 200, data: flattenBoxes(mailboxes) });
+
+        imap.end();
+      });
     });
 
     imap.connect();

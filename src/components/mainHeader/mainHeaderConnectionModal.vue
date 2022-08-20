@@ -83,8 +83,8 @@ export default {
         this.imapStatus = -1;
         this.smtpStatus = -1;
         Promise.all([
-          fetch("http://localhost:3000/authIMAP", getFetchOptions("imap")),
-          fetch("http://localhost:3000/authSMTP", getFetchOptions("smtp")),
+          fetch(`${process.env.VUE_APP_API_URL || window.location.href}authIMAP`, getFetchOptions("imap")),
+          fetch(`${process.env.VUE_APP_API_URL || window.location.href}authSMTP`, getFetchOptions("smtp")),
         ])
           .then(([{ status: imap }, { status: smtp }]) => {
             this.imapStatus = imap;
