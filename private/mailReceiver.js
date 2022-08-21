@@ -157,7 +157,8 @@ module.exports.getEmail = ({ auth, host, port, box, uid }) => {
 
           msg.on("end", async () => {
             let parsed = await header;
-            let html = await body;
+            let { html, attachments } = await body;
+
             msg.removeAllListeners();
             resolve({
               status: 200,
@@ -168,6 +169,7 @@ module.exports.getEmail = ({ auth, host, port, box, uid }) => {
                   to: parsed.to.value,
                 },
                 html,
+                attachments,
                 uid: attributes.uid,
                 date: attributes.date,
                 flags: attributes.flags,
@@ -218,7 +220,10 @@ function readMsgBody(imap, attr) {
           parts[info.which].content = decodeBuffer(Buffer.concat(buffer), part.encoding, part.type);
         });
       });
-      msg.on("end", () => resolve(getHTMLContent(parts)));
+      msg.on("end", () => {
+        msg.removeAllListeners();
+        resolve(getHTMLContent(parts));
+      });
       msg.on("error", () => resolve(""));
     });
     f.once("end", () => {
@@ -275,13 +280,70 @@ module.exports.getBoxes = ({ auth, host, port }) => {
     imap.once("ready", () => {
       imap.getBoxes((err, mailboxes) => {
         if (err) resolve(getErrorResponse(err));
-        console.log(mailboxes);
         resolve({ status: 200, data: flattenBoxes(mailboxes) });
 
         imap.end();
       });
     });
 
+    imap.connect();
+  });
+};
+
+module.exports.getAttachment = ({ auth, host, port, box, uid, attachment }) => {
+  return new Promise((resolve) => {
+    var imap = new Imap({
+      user: auth?.user,
+      password: auth?.pass,
+      host,
+      port,
+      tls: true,
+    });
+    imap.once("error", (err) => {
+      resolve(getErrorResponse(err));
+    });
+    imap.once("end", () => {
+      imap.removeAllListeners();
+      console.log("Connection ended");
+    });
+    imap.once("ready", () => {
+      imap.openBox(box, true, (err) => {
+        if (err) {
+          resolve(getErrorResponse(err));
+          return;
+        }
+        console.log(`getAttachment => ${uid}/${attachment.partID}`);
+        let { partID, type, subtype, encoding } = attachment;
+        var f = imap.fetch(uid, {
+          bodies: [partID],
+          struct: true,
+        });
+
+        f.once("message", (msg) => {
+          const buffer = [];
+          msg.on("body", (stream) => {
+            stream.on("data", (chunk) => buffer.push(chunk));
+          });
+          msg.on("end", () => {
+            msg.removeAllListeners();
+            resolve({
+              status: 200,
+              data: {
+                content: decodeBuffer(Buffer.concat(buffer), encoding, type),
+                type,
+                subtype,
+              },
+            });
+          });
+          msg.on("error", (err) => resolve(getErrorResponse(err)));
+        });
+
+        f.once("end", () => {
+          f.removeAllListeners();
+          imap.end();
+        });
+      });
+    });
     imap.connect();
   });
 };

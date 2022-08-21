@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const SMTPConnection = require("nodemailer/lib/smtp-connection");
 let { getErrorResponse } = require("./utils.js");
 
 module.exports.sendMail = ({ auth, host, port, mail }) => {
@@ -44,25 +45,35 @@ module.exports.sendMail = ({ auth, host, port, mail }) => {
 
 module.exports.isSMTPAuthValid = ({ auth, host, port }) => {
   return new Promise((resolve) => {
-    nodemailer.createTestAccount((err, test) => {
-      if (err) {
-        resolve({ status: 500 });
-        return;
-      }
-      module.exports
-        .sendMail({
-          auth,
-          host,
-          port,
-          mail: {
-            to: test.user,
-            from: "TEST",
-            subject: "Connexion Test",
-            text: "",
-            html: "",
-          },
-        })
-        .then((res) => resolve({ status: res.status }));
+    let connection = new SMTPConnection({
+      port,
+      host,
+      secure: false,
+      authMethod: "LOGIN",
     });
+
+    connection.on("connect", () => {
+      connection.login(
+        {
+          credentials: auth,
+        },
+        (err) => {
+          if (err) {
+            resolve(getErrorResponse(err));
+            connection.quit();
+            return;
+          }
+          resolve({ status: 200 });
+          connection.quit();
+        }
+      );
+    });
+
+    connection.on("error", (err) => {
+      resolve(getErrorResponse(err));
+      connection.quit();
+    });
+
+    connection.connect();
   });
 };

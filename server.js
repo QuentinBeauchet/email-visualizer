@@ -5,6 +5,7 @@ let {
   isIMAPAuthValid,
   isSMTPAuthValid,
   getBoxes,
+  getAttachment,
 } = require("./private/customImap.js");
 
 const express = require("express");
@@ -14,7 +15,7 @@ const path = `${__dirname}/dist/`;
 const app = express();
 const port = 3000;
 
-const queues = ["infos", "mail", "send", "authIMAP", "authSMTP", "getBoxes"].reduce(
+const queues = ["infos", "mail", "send", "authIMAP", "authSMTP", "boxes", "attachment"].reduce(
   (obj, key) => ({
     ...obj,
     [key]: [
@@ -64,7 +65,11 @@ app.use("/authSMTP", (req, res) => {
 });
 
 app.use("/boxes", (req, res) => {
-  addToRequestQueue(req, res, "getBoxes", getBoxes(req.body));
+  addToRequestQueue(req, res, "boxes", getBoxes(req.body));
+});
+
+app.use("/attachment", (req, res) => {
+  addToRequestQueue(req, res, "attachment", getAttachment(req.body));
 });
 
 app.listen(port, () => {

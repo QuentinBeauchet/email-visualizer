@@ -43,8 +43,9 @@ module.exports.getHTMLContent = (parts) => {
   let noHTML = "";
   let HTML;
   let sources = [];
+  let attachments = [];
   for (let key in parts) {
-    let { type, subtype, id, content } = parts[key];
+    let { partID, id, type, subtype, encoding, size, content, disposition } = parts[key];
     if (type == "text") {
       if (subtype == "html") {
         HTML = content;
@@ -53,13 +54,20 @@ module.exports.getHTMLContent = (parts) => {
       }
     }
     if (type == "image") {
-      sources[id.slice(1, -1)] = `data:image/png;base64,${content}`;
+      if (disposition.type == "ATTACHMENT") {
+        attachments.push({ partID, encoding, size, type, subtype, filename: disposition.params.filename });
+      } else {
+        sources[id.slice(1, -1)] = `data:image/png;base64,${content}`;
+      }
     }
   }
   for (let sourceID in sources) {
     HTML = HTML.replace(`cid:${sourceID}`, sources[sourceID]);
   }
-  return HTML || `<html><head></head><body><pre style="white-space: break-spaces;">${noHTML}</pre></body></html>`;
+  return {
+    html: HTML || `<html><head></head><body><pre style="white-space: break-spaces;">${noHTML}</pre></body></html>`,
+    attachments,
+  };
 };
 
 /**

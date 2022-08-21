@@ -137,13 +137,16 @@ export default {
       if (this.idDisplayed != uid) {
         this.idDisplayed = uid;
         let cache = sessionStorage.getItem(uid);
+
         if (cache) {
+          let { html, attachments } = JSON.parse(cache);
           this.$emit("displayingMail", {
             uid,
             flags,
             header,
             date,
-            html: cache,
+            html,
+            attachments,
           });
         } else {
           this.$emit("displayingMail", {
@@ -152,6 +155,7 @@ export default {
             header,
             date,
             html: undefined,
+            attachments: [],
           });
           fetch(`${process.env.VUE_APP_API_URL || window.location.href}mail`, {
             method: "POST",
@@ -170,14 +174,15 @@ export default {
             }),
           })
             .then((res) => res.json())
-            .then((json) => {
-              sessionStorage.setItem(uid, json.html);
+            .then(({ html, attachments }) => {
+              sessionStorage.setItem(uid, JSON.stringify({ html, attachments }));
               this.$emit("displayingMail", {
                 uid,
                 flags,
                 header,
                 date,
-                html: json.html,
+                html,
+                attachments,
               });
             })
             .catch(() => {
@@ -187,6 +192,7 @@ export default {
                 header,
                 date,
                 html: null,
+                attachments: [],
               });
             });
         }

@@ -5,6 +5,16 @@
     </div>
     <div v-if="mail" id="area" ref="area">
       <DisplayAreaSender v-if="loaded" :mail="mail" id="sender" />
+      <section id="attachments">
+        <DisplayAreaAttachmentsArticle
+          v-for="attachment in mail.attachments"
+          :key="attachment.partID"
+          :uid="mail.uid"
+          :attachment="attachment"
+          :credentials="credentials"
+          :box="box"
+        />
+      </section>
       <iframe
         v-if="mail.html"
         v-show="loaded"
@@ -27,6 +37,7 @@ import DisplayAreaReply from "./DisplayAreaReply.vue";
 import Loading from "../svg/Loading.vue";
 import SVGError from "../svg/SVGError.vue";
 import DisplayAreaSender from "./DisplayAreaSender.vue";
+import DisplayAreaAttachmentsArticle from "./DisplayAreaAttachmentsArticle.vue";
 
 export default {
   name: "DisplayArea",
@@ -34,12 +45,15 @@ export default {
     mail: Object,
     resizeBounds: Object,
     resizing: Boolean,
+    credentials: Object,
+    box: String,
   },
   components: {
     DisplayAreaReply,
     Loading,
     SVGError,
     DisplayAreaSender,
+    DisplayAreaAttachmentsArticle,
   },
   data: function () {
     return {
@@ -160,5 +174,17 @@ iframe {
   justify-content: space-between;
   align-self: flex-start;
   width: max(v-bind("widthSender"), calc(100% - 20px));
+}
+
+#attachments {
+  display: flex;
+  flex-direction: row;
+  height: 3rem;
+  gap: 0.5rem;
+  overflow-x: auto;
+  width: max(v-bind("widthSender"), calc(100% - 20px));
+  padding-bottom: 0.3rem;
+  margin: 0;
+  flex-shrink: 0;
 }
 </style>

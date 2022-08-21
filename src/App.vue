@@ -35,6 +35,8 @@
       ref="display"
       :resize-bounds="resizeBounds"
       :resizing="resizing"
+      :credentials="credentials"
+      :box="box"
     />
   </main>
 </template>

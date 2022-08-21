@@ -25,36 +25,7 @@ export default {
   emits: ["filter"],
   data: function () {
     return {
-      toStyle: { cursor: "zoom-in", height: "15px" },
-      to: [
-        "Quentin Beauchet",
-        "Ratna Beau",
-        "Puabi Iris",
-        "Quiteria Gasparo",
-        "Laurette Sudarshan",
-        "Gerlind Canute",
-        "Marina Katelijne",
-        "Bahram Sezim",
-        "Soraya Pushpa",
-        "Milian Ireneus",
-        "Orsino Juda",
-        "Quiteria Gasparo",
-        "Laurette Sudarshan",
-        "Gerlind Canute",
-        "Marina Katelijne",
-        "Bahram Sezim",
-        "Soraya Pushpa",
-        "Milian Ireneus",
-        "Orsino Juda",
-        "Quiteria Gasparo",
-        "Laurette Sudarshan",
-        "Gerlind Canute",
-        "Marina Katelijne",
-        "Bahram Sezim",
-        "Soraya Pushpa",
-        "Milian Ireneus",
-        "Orsino Juda",
-      ],
+      toStyle: { cursor: "zoom-in", height: "16px" },
     };
   },
   computed: {
@@ -86,7 +57,7 @@ export default {
       if (this.toStyle.cursor == "zoom-in") {
         this.toStyle = { cursor: "zoom-out", height: "initial" };
       } else {
-        this.toStyle = { cursor: "zoom-in", height: "17px" };
+        this.toStyle = { cursor: "zoom-in", height: "16px" };
       }
     },
     filterBySender: function () {
