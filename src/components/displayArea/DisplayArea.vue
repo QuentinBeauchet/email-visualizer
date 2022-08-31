@@ -6,9 +6,9 @@
     <div v-if="mail" id="area" ref="area">
       <DisplayAreaSender v-if="loaded" :mail="mail" id="sender" />
       <section id="attachments">
-        <DisplayAreaAttachmentsArticle
+        <DisplayAreaAttachments
           v-for="attachment in mail.attachments"
-          :key="attachment.partID"
+          :key="attachment"
           :uid="mail.uid"
           :attachment="attachment"
           :credentials="credentials"
@@ -37,7 +37,7 @@ import DisplayAreaReply from "./DisplayAreaReply.vue";
 import Loading from "../svg/Loading.vue";
 import SVGError from "../svg/SVGError.vue";
 import DisplayAreaSender from "./DisplayAreaSender.vue";
-import DisplayAreaAttachmentsArticle from "./DisplayAreaAttachmentsArticle.vue";
+import DisplayAreaAttachments from "./DisplayAreaAttachments.vue";
 
 export default {
   name: "DisplayArea",
@@ -53,7 +53,7 @@ export default {
     Loading,
     SVGError,
     DisplayAreaSender,
-    DisplayAreaAttachmentsArticle,
+    DisplayAreaAttachments,
   },
   data: function () {
     return {

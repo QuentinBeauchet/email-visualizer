@@ -1,24 +1,27 @@
-# hello-world
+# Project Setup
 
-## Project setup
+### For development
+
+You need a .env file containing
+
 ```
-npm install
+VUE_APP_API_URL="http://localhost:3000/"
 ```
 
-### Compiles and hot-reloads for development
+Then run in two separate terminal
+
 ```
 npm run serve
+npm start
 ```
 
-### Compiles and minifies for production
+The client will be hosted on http://localhost:8080/
+
+### For production
+
 ```
 npm run build
+npm start
 ```
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+The client will be hosted on http://localhost:3000/

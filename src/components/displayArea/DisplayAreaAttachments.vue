@@ -11,7 +11,7 @@
 <script>
 import SVGDownload from "../svg/SVGDownload.vue";
 export default {
-  name: "DisplayAreaAttachmentsArticle",
+  name: "DisplayAreaAttachments",
   props: { uid: Number, attachment: Object, credentials: Object, box: String },
   data: function () {
     return {

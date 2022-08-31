@@ -42,8 +42,6 @@ app.use(express.json());
 
 app.use("/", express.static(path));
 
-app.use("/test", express.static(`${__dirname}/public/`));
-
 app.use("/infos", (req, res) => {
   addToRequestQueue(req, res, "infos", getEmailsInfos(req.body));
 });
