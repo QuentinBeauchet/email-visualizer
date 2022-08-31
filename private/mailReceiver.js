@@ -1,4 +1,3 @@
-require("dotenv").config();
 var Imap = require("node-imap");
 const simpleParser = require("mailparser").simpleParser;
 let { decodeBuffer, flattenAttribute, getHTMLContent, getErrorResponse, flattenBoxes } = require("./utils.js");
