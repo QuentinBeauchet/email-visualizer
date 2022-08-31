@@ -13,7 +13,7 @@ var cors = require("cors");
 
 const path = `${__dirname}/dist/`;
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 const queues = ["infos", "mail", "send", "authIMAP", "authSMTP", "boxes", "attachment"].reduce(
   (obj, key) => ({
