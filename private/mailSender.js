@@ -4,8 +4,9 @@ let { getErrorResponse } = require("./utils.js");
 
 module.exports.sendMail = ({ auth, host, port, mail }) => {
   console.log(`New mail from ${auth.user}`);
+  console.log(mail);
 
-  let { to, from, subject, text, html } = mail;
+  let { to, cc, bcc, from, subject, text, html } = mail;
   let transporter = nodemailer.createTransport({
     auth,
     host,
@@ -19,8 +20,10 @@ module.exports.sendMail = ({ auth, host, port, mail }) => {
   return new Promise((resolve) => {
     transporter.sendMail(
       {
-        from: `"${from}" <${auth.user}>`,
+        from: `"${from || ""}" <${auth.user}>`,
         to,
+        cc,
+        bcc,
         subject,
         text,
         html,

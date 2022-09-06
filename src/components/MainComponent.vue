@@ -1,7 +1,9 @@
 <template>
+  <EditionArea v-show="editing" @editing="onEditing" :credentials="credentials" />
   <OptionsHeader
     @expansion="onExpansion"
     @pinned="onPinned"
+    @editing="onEditing"
     :mail="displayedMail"
     :pinned="pinneds.has(displayedMail?.uid)"
     v-if="credentials"
@@ -41,6 +43,7 @@ import DisplayArea from "./displayArea/DisplayArea.vue";
 import BoxesSelection from "./boxesSelection/BoxesSelection.vue";
 import OptionsHeader from "./optionHeader/OptionsHeader.vue";
 import LoadingBar from "./svg/Loading.vue";
+import EditionArea from "./EditionArea/EditionArea.vue";
 
 export default {
   name: "MainComponent",
@@ -50,6 +53,7 @@ export default {
     BoxesSelection,
     OptionsHeader,
     LoadingBar,
+    EditionArea,
   },
   emits: ["reset-data"],
   props: {
@@ -67,6 +71,7 @@ export default {
       expanded: true,
       resizing: false,
       box: "INBOX",
+      editing: false,
     };
   },
   methods: {
@@ -98,6 +103,10 @@ export default {
     },
     onListWidthChanged: function (width) {
       this.resizeBounds.listWidth = width;
+    },
+    onEditing: function ({ state, args }) {
+      console.log("EDITING", state, args);
+      this.editing = state;
     },
   },
 };

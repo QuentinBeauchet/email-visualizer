@@ -1,7 +1,7 @@
 <template>
   <header>
     <OptionsHeaderExpend @expansion="onExpansion" id="expend" />
-    <OptionsHeaderNew />
+    <OptionsHeaderNew @editing="onEditing" />
     <OptionsHeaderReply v-if="mail" />
     <OptionsHeaderDeletion v-if="mail" />
     <OptionsHeaderSpam v-if="mail" />
@@ -37,7 +37,7 @@ export default {
     mail: Object,
     pinned: Boolean,
   },
-  emits: ["expansion", "pinned"],
+  emits: ["expansion", "pinned", "editing"],
   data: function () {
     return {
       iframeContent: undefined,
@@ -54,6 +54,9 @@ export default {
     },
     onPinned: function (pinned) {
       this.$emit("pinned", { pinned, uid: this.mail.uid });
+    },
+    onEditing: function (reply) {
+      this.$emit("editing", { state: true, args: reply });
     },
   },
 };
