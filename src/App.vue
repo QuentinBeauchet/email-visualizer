@@ -1,109 +1,33 @@
 <template>
   <ConnexionHeader @connected="onConnected" />
-  <OptionsHeader
-    @expansion="onExpansion"
-    @pinned="onPinned"
-    :mail="displayedMail"
-    :pinned="pinneds.has(displayedMail?.uid)"
-    v-if="credentials"
-  />
-  <main v-if="credentials">
-    <Suspense>
-      <BoxesSelection id="menu" v-show="expanded" :credentials="credentials" @load-box="onLoadBox" />
-      <template #fallback><LoadingBar :resize-bounds="resizeBounds" /></template>
-    </Suspense>
-    <Suspense>
-      <EmailList
-        v-if="box"
-        @displaying-mail="ondDisplayingMail"
-        :pinneds="pinneds"
-        @pinned="onPinned"
-        :resize-bounds="resizeBounds"
-        @resize="onResize"
-        :display-right="getDisplayRight()"
-        :credentials="credentials"
-        :box="box"
-      />
-      <LoadingBar :resize-bounds="resizeBounds" v-else />
-      <template #fallback><LoadingBar :resize-bounds="resizeBounds" /></template>
-    </Suspense>
-    <DisplayArea
-      v-if="box"
-      id="displayArea"
-      :class="{ extendedDisplayArea: !expanded }"
-      :mail="displayedMail"
-      ref="display"
-      :resize-bounds="resizeBounds"
-      :resizing="resizing"
-      :credentials="credentials"
-      :box="box"
-    />
-  </main>
+  <Suspense v-if="this.credentials">
+    <MainComponent @reset-data="resetData" :credentials="credentials" />
+    <template #fallback><LoadingBar /></template>
+  </Suspense>
 </template>
 
 <script>
-import EmailList from "./components/emailList/EmailList.vue";
-import LoadingBar from "./components/svg/Loading.vue";
-import OptionsHeader from "./components/optionHeader/OptionsHeader.vue";
 import ConnexionHeader from "./components/mainHeader/mainHeader.vue";
-import DisplayArea from "./components/displayArea/DisplayArea.vue";
-import BoxesSelection from "./components/boxesSelection/BoxesSelection.vue";
+import MainComponent from "./components/MainComponent.vue";
+import LoadingBar from "./components/svg/Loading.vue";
 
 export default {
   name: "App",
   components: {
-    EmailList,
-    LoadingBar,
-    OptionsHeader,
     ConnexionHeader,
-    DisplayArea,
-    BoxesSelection,
+    MainComponent,
+    LoadingBar,
   },
   data: function () {
     return {
       credentials: undefined,
-      displayedMail: undefined,
-      expanded: true,
-      pinneds: new Set(),
-      resizeBounds: {
-        lower: "300px",
-        upper: "450px",
-      },
-      resizing: false,
-      box: "INBOX",
     };
   },
   methods: {
-    ondDisplayingMail: function (mail) {
-      this.displayedMail = mail;
-    },
-    onExpansion: function () {
-      this.expanded = !this.expanded;
-    },
-    onPinned: function ({ pinned, uid }) {
-      if (pinned) {
-        this.pinneds.add(uid);
-      } else {
-        this.pinneds.delete(uid);
-      }
-    },
-    onResize: function (resizing) {
-      this.resizing = resizing;
-    },
-    getDisplayRight: function () {
-      return this.$refs.display?.getBoundingClientRect().right;
-    },
     onConnected: function (credentials) {
       this.credentials = undefined;
       this.$nextTick(() => {
         this.credentials = credentials;
-      });
-      this.resetData();
-    },
-    onLoadBox: function (box) {
-      this.box = undefined;
-      this.$nextTick(() => {
-        this.box = box;
       });
       this.resetData();
     },

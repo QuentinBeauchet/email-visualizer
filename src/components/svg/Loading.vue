@@ -13,8 +13,19 @@
 export default {
   name: "LoadingBar",
   props: {
-    resizeBounds: Object,
+    resizeBounds: {
+      default: function () {
+        return { lower: "300px", upper: "450px" };
+      },
+      type: Object,
+    },
     asArticle: Boolean,
+    width: {
+      default: function () {
+        return "100%";
+      },
+      type: String,
+    },
   },
 };
 </script>
@@ -24,12 +35,13 @@ export default {
   flex-grow: 0;
   min-width: v-bind("resizeBounds.lower");
   max-width: calc(85% - v-bind("resizeBounds.upper"));
-  width: 25%;
+  width: v-bind("width");
   flex-shrink: 0;
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  align-self: center;
+  margin: auto 0 auto 0;
 }
 
 .C1 {

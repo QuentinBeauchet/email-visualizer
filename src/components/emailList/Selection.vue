@@ -51,8 +51,7 @@ export default {
   computed: {
     svgType() {
       if (this.isSelected) return "selected";
-      if (this.isVisible)
-        return this.isCircleTickVisible ? "tickVisible" : "tickHidden";
+      if (this.isVisible) return this.isCircleTickVisible ? "tickVisible" : "tickHidden";
       return "none";
     },
   },
@@ -80,7 +79,7 @@ export default {
 
 <style scoped>
 div {
-  width: calc(10% - 0.3rem);
+  width: 2.5rem;
   flex-shrink: 0;
   display: flex;
   justify-content: center;

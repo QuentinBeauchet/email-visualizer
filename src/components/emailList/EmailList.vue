@@ -55,7 +55,7 @@ export default {
     EmailListFetchProgression,
     Loading,
   },
-  emits: ["displayingMail", "pinned", "resize"],
+  emits: ["displayingMail", "pinned", "resize", "width-changed"],
   async setup(props) {
     try {
       sessionStorage.clear();
@@ -82,7 +82,6 @@ export default {
         }),
       });
       let json = await res.json();
-
       return {
         boxInfos: ref(json.box),
         mailsInfos: ref(json.mails),
@@ -114,6 +113,9 @@ export default {
     displayRight: Number,
     credentials: Object,
     box: String,
+  },
+  mounted: function () {
+    this.$refs.section.style.width = this.resizeBounds.listWidth;
   },
   computed: {
     mailsList: function () {
@@ -285,11 +287,13 @@ export default {
       this.addResizeEvents();
     },
     onDragEnd: function () {
-      this.$refs.section.style.width = `${
+      let width = `${
         this.$refs.section.getBoundingClientRect().width +
         this.$refs.resizeBar.getBoundingClientRect().right -
         this.$refs.section.getBoundingClientRect().right
       }px`;
+      this.$emit("width-changed", width);
+      this.$refs.section.style.width = width;
       this.$refs.resizeBar.style.left = "0px";
       this.resizeInfos = undefined;
       this.removeResizeEvents();
@@ -335,6 +339,7 @@ section {
 
 #list {
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 header {
@@ -350,7 +355,7 @@ header {
 }
 
 #selectorAll {
-  margin-left: 0.2rem;
+  margin-left: 0.3rem;
 }
 
 #resizeBar {

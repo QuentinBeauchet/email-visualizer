@@ -110,7 +110,7 @@ article:hover {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  max-width: 80%;
+  max-width: calc(100% - 5.3rem);
   padding: 0.5rem 0 0.5rem 0;
   height: fit-content;
 }
